@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Inscription</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel='icon' href='/images/favicon.ico' class='js-favicon'>
 </head>
 <body>
     <h1>Inscription</h1>
@@ -45,15 +47,15 @@
         })
         .then(response => {
             if (!response.ok) {
-                throw response; // Si la réponse n'est pas ok, on la rejette pour la traiter dans le bloc catch
+                throw response;
             }
-            return response.json(); // On s'attend à obtenir une réponse JSON
+            return response.json();
         })
         .then(data => {
             if (data.redirect) {
-                window.location.href = data.redirect; // Rediriger l'utilisateur
+                window.location.href = data.redirect;
             } else {
-                alert(data.message); // Afficher le message reçu
+                alert(data.message);
             }
         })
         .catch(error => {
