@@ -1,0 +1,9 @@
+<nav>
+    <% if (!user) { %>
+        <a href="/users/signup">Inscription</a> |
+        <a href="/users/login">Connexion</a>
+    <% } else { %>
+        Bonjour, <%= user.username %> |
+        <a href="/logout">Déconnexion</a>
+    <% } %>
+</nav>

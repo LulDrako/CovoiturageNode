@@ -1,11 +1,14 @@
+<!-- passengerHome.ejs -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Passenger Home</title>
+    <title>Espace Passager</title>
 </head>
 <body>
+    <%- include('header', { user: user }) %> <!-- Passez 'user' à 'header' ici -->
     <h1>Welcome, Passenger!</h1>
-    <!-- Additional content for passengers can be added here -->
+    <!-- Le reste du contenu de la page -->
+    <%- include('footer') %> <!-- Si vous avez un footer à inclure également -->
 </body>
 </html>

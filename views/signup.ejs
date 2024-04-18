@@ -1,20 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Sign Up</title>
+    <title>Inscription</title>
 </head>
 <body>
-    <h1>Sign Up</h1>
-    <form action="/users/signup" method="post">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <select name="role">
-            <option value="driver">Driver</option>
-            <option value="passenger">Passenger</option>
+    <h1>Inscription</h1>
+    <form id="signup-form">
+        <label for="username">Nom d'utilisateur :</label>
+        <input type="text" id="username" name="username" required placeholder="Nom d'utilisateur">
+        
+        <label for="email">Email :</label>
+        <input type="email" id="email" name="email" required placeholder="Email">
+        
+        <label for="password">Mot de passe :</label>
+        <input type="password" id="password" name="password" required placeholder="Mot de passe" autocomplete="current-password">
+        
+        <label for="role">Rôle :</label>
+        <select id="role" name="role" required>
+            <option value="driver">Conducteur</option>
+            <option value="passenger">Passager</option>
         </select>
-        <button type="submit">Sign Up</button>
+        
+        <button type="submit">S'inscrire</button>
     </form>
+
+    <script>
+       document.addEventListener('DOMContentLoaded', () => {
+    const signupForm = document.getElementById('signup-form');
+    signupForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const role = document.getElementById('role').value;
+
+        fetch('/users/signup', {
+            method: 'POST',
+            body: JSON.stringify({ username, email, password, role }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw response; // Si la réponse n'est pas ok, on la rejette pour la traiter dans le bloc catch
+            }
+            return response.json(); // On s'attend à obtenir une réponse JSON
+        })
+        .then(data => {
+            if (data.redirect) {
+                window.location.href = data.redirect; // Rediriger l'utilisateur
+            } else {
+                alert(data.message); // Afficher le message reçu
+            }
+        })
+        .catch(error => {
+            error.json().then(err => {
+                console.error('Erreur:', err);
+                alert(err.error || "Une erreur s'est produite. Veuillez réessayer.");
+            });
+        });
+    });
+});
+
+    </script>
 </body>
 </html>
