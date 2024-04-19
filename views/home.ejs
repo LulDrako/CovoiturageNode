@@ -1,4 +1,3 @@
-<!-- views/home.ejs -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -6,10 +5,76 @@
     <title>Bienvenue chez EcoCovoit</title>
     <link rel="stylesheet" href="/stylesheets/style.css">
     <link rel='icon' href='/images/favicon.ico' class='js-favicon'>
+    <style>
+        /* Style pour le conteneur de la vidéo */
+        .video-container {
+            max-width: 800px;
+            margin: 0 auto;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            overflow: hidden;
+        }
+        
+        /* Style pour la vidéo elle-même */
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+        }
+    
+        /* Style pour le titre */
+        h1 {
+            text-align: center;
+        }
+
+        /* Style pour le paragraphe */
+        p {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Style pour les liens */
+        a {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* Style pour l'en-tête */
+        header {
+            padding: 10px 0;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Style pour le logo */
+        .logo {
+            max-width: 200px;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <!-- Remplacez "YOUR_LOGO_PATH" par le chemin vers votre logo -->
+        <img src="/images/logo_ecocovoit.png" alt="Logo EcoCovoit" class="logo">
+        <nav>
+            <ul>
+                <li><a href="/users/signup">Inscription</a></li>
+                <li><a href="/users/login">Connexion</a></li>
+            </ul>
+        </nav>
+    </header>
     <h1>Bienvenue chez EcoCovoit</h1>
     <p>Votre solution de covoiturage écoresponsable !</p>
-    <a href="/users/signup">Inscription</a> | <a href="/users/login">Connexion</a>
+    <div class="video-container">
+        <iframe src="/images/Covoiturage _ avantages et inconvénients.mp4"  autoplay controls></iframe>
+    </div>
 </body>
 </html>

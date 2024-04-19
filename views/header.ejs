@@ -5,16 +5,90 @@
     <link rel="stylesheet" href="/stylesheets/style.css">
     <link rel='icon' href='/images/favicon.ico' class='js-favicon'>
 </head>
+<style>
+    header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #f2f2f2;
+}
+
+header nav {
+  text-align: right;
+}
+
+header img.logo {
+  height: 50px;
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+  border-color: #4a90e2;
+}
+
+button {
+  width: 100%;
+  background-color: #4a90e2;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #367ab5;
+}
+
+.header-greeting {
+  font-size: 1.2rem;
+  color: #333;
+  font-weight: bold;
+}
+
+.header-logout a {
+  font-size: 1rem;
+  color: #555;
+  text-decoration: none;
+  padding-left: 10px;
+}
+
+.header-logout a:hover {
+  text-decoration: underline;
+}
+</style>
 <body>
     
-<nav>
-    <% if (!user) { %>
-        <a href="/users/signup">Inscription</a> |
-        <a href="/users/login">Connexion</a>
-    <% } else { %>
-        Bonjour, <%= user.username %> |
-        <a href="/logout">Déconnexion</a>
-    <% } %>
-</nav>
+    <header>
+        <img src="/images/logo_ecocovoit.png" alt="Logo" class="logo" width="150px" >
+        <nav>
+            <% if (!user) { %>
+                <a href="/users/signup">Inscription</a> |
+                <a href="/users/login">Connexion</a>
+            <% } else { %>
+                <div class="header-greeting">
+                    Bonjour, <%= user.username %>
+                </div>
+                <div class="header-logout">
+                    <a href="/logout">Déconnexion</a>
+                </div>
+            <% } %>
+          </nav>
+    </header>
 </body>
 </html>

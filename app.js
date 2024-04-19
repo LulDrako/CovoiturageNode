@@ -6,12 +6,17 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const favicon = require('serve-favicon');
 const User = require('./models/User');
+const Car = require('./models/Car');
+const Trip = require('./models/Trip');
+require('dotenv').config();
+const axios = require('axios');
+
 
 const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-mongoose.connect('mongodb://localhost:27017/EcoCovoit')
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB connected successfully"))
   .catch(err => console.error("MongoDB connection error:", err));
 
@@ -44,6 +49,22 @@ app.get('/users/login', function(req, res) {
     res.render('login');
 });
 
+// In app.js
+app.post('/reserve-trip', isAuthenticated, async (req, res) => {
+  const { tripId } = req.body;
+  // Perform reservation logic, e.g., mark the trip as pending payment
+  // ...
+  res.status(200).send(); // Send an OK status
+});
+
+// In app.js
+app.get('/payment', isAuthenticated, async (req, res) => {
+  const { tripId } = req.query; // Retrieve the tripId from the query parameter
+  // Render the payment page, passing the tripId to it
+  res.render('payment', { tripId });
+});
+
+
 app.get('/logout', function(req, res) {
   req.session.destroy(function(err) {
     if (err) {
@@ -54,20 +75,116 @@ app.get('/logout', function(req, res) {
   });
 });
 
-app.get('/driverHome', isAuthenticated, function(req, res) {
-  res.render('driverHome', {
-    title: 'Espace Conducteur',
-    user: req.user
-  });
+
+app.post('/create-trip', isAuthenticated, async function(req, res) {
+  const { carId, startPoint, endPoint, price, additionalInfo } = req.body;
+
+  try {
+    if (!carId) {
+      return res.status(400).json({ error: 'Car ID is required' });
+    }
+
+    const car = await Car.findById(carId);
+
+    if (!car) {
+      return res.status(404).json({ error: 'Car not found' });
+    }
+
+    const response = await axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${startPoint}&destination=${endPoint}&key=${process.env.GOOGLE_MAPS_API_KEY}`);
+    
+    if (!response.data || !response.data.routes || response.data.routes.length === 0) {
+      return res.status(404).json({ error: 'No routes found' });
+    }
+
+    const route = response.data.routes[0];
+
+    if (!route.legs || route.legs.length === 0) {
+      return res.status(404).json({ error: 'No legs found in the route' });
+    }
+
+    const duration = route.legs[0].duration.text;
+    const distance = route.legs[0].distance.text;
+
+    const trip = new Trip({
+      driver: req.user._id,
+      car: car._id, 
+      startPoint: startPoint,
+      endPoint: endPoint,
+      departureTime: new Date(),
+      seatsAvailable: car.seats,
+      price: price,
+      additionalInfo: additionalInfo,
+      duration: duration,
+      distance: distance
+    });
+
+    await trip.save();
+
+    res.json({ message: 'Trip created successfully', trip });
+  } catch (error) {
+    console.error('Error creating trip:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
-app.get('/passengerHome', isAuthenticated, function(req, res) {
-  res.render('passengerHome', {
-    title: 'Espace Passager',
-    user: req.user
-  });
+app.post('/trips/:id/delete', isAuthenticated, async (req, res) => {
+  try {
+      const result = await Trip.findByIdAndDelete(req.params.id);
+      if (!result) {
+          return res.status(404).send("Trip not found");
+      }
+      res.redirect('/driverHome'); 
+  } catch (error) {
+      console.error('Error deleting trip:', error);
+      res.status(500).send("Internal server error");
+  }
 });
 
+
+
+
+app.get('/driverHome', isAuthenticated, async function(req, res) {
+  if (req.user.role === 'driver') {
+    try {
+      const cars = await Car.find();
+      const trips = await Trip.find({ driver: req.user._id }).populate('car');
+      
+
+      res.render('driverHome', {
+        title: 'Espace Conducteur',
+        user: req.user,
+        cars: cars,
+        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+        trips: trips,
+      });
+    } catch (error) {
+      console.error('Error retrieving cars:', error);
+      res.status(500).send("Internal server error.");
+    }
+  } else {
+    res.redirect('/passengerHome');
+  }
+});
+
+
+
+app.get('/passengerHome', isAuthenticated, async function(req, res) {
+  if(req.user.role === 'passenger') {
+    try {
+      const trips = await Trip.find().populate('car');
+      res.render('passengerHome', {
+        title: 'Espace Passager',
+        user: req.user,
+        trips: trips
+      });
+    } catch (error) {
+      console.error('Erreur lors de la récupération des trajets:', error);
+      res.status(500).send("Erreur interne du serveur.");
+    }
+  } else {
+    res.redirect('/driverHome');
+  }
+});
 app.post("/users/signup", async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
@@ -86,7 +203,7 @@ app.post("/users/signup", async (req, res) => {
     const user = await new User({
       username,
       email,
-      hashedPassword, // Utilisation de hashedPassword au lieu de password
+      hashedPassword,
       role,
     }).save();
  
@@ -118,7 +235,7 @@ app.post("/users/login", async (req, res) => {
     }
  
     console.log("Mot de passe soumis (clair):", password);
-    console.log("Mot de passe stocké (haché):", user.hashedPassword); // Utilisation de hashedPassword au lieu de password
+    console.log("Mot de passe stocké (haché):", user.hashedPassword);
  
     const isMatch = user.comparePassword(password);
     console.log("Le mot de passe correspond-il ?:", isMatch);
@@ -137,6 +254,18 @@ app.post("/users/login", async (req, res) => {
     res.status(500).send("Erreur interne du serveur.");
   }
 });
+
+// app.js
+app.post('/process-payment', isAuthenticated, async (req, res) => {
+  // ... your payment processing logic ...
+
+  if (paymentSuccessful) {
+    res.json({ success: true, message: 'Paiement confirmé.' });
+  } else {
+    res.json({ success: false, message: 'Paiement échoué.' });
+  }
+});
+
 
 
 async function isAuthenticated(req, res, next) {

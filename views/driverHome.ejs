@@ -1,16 +1,293 @@
-<!-- passengerHome.ejs -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Espace Passager</title>
+    <title>Espace Conducteur</title>
     <link rel="stylesheet" href="/stylesheets/style.css">
-    <link rel='icon' href='/images/favicon.ico' class='js-favicon'>
+    <link rel="icon" href='/images/favicon.ico' type="image/x-icon">
+    <link rel="stylesheet" href="/swiper/swiper-bundle.css">
+    <style>
+      body {
+          font-family: Arial, sans-serif;
+          background-color: #f2f2f2;
+          padding: 20px;
+      }
+
+      h1 {
+          text-align: center;
+      }
+
+      #confirmation {
+          text-align: center;
+          margin-top: 20px;
+          font-weight: bold;
+          color: #4CAF50;
+          margin-bottom: 10px;
+        }
+
+      #google-map {
+          height: 500px;
+          margin-top: 3%;
+          margin-bottom: 3%;
+      }
+
+      #route-summary {
+          margin-top: 20px;
+          padding: 20px;
+          background-color: #fff;
+          border-radius: 8px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      #details {
+          margin-top: 10px;
+      }
+
+      #trips-list {
+          margin-top: 20px;
+      }
+
+      .trip {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 20px;
+          padding: 15px;
+          background-color: #fff;
+          border-radius: 8px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .trip-content {
+          display: flex;
+          align-items: center;
+      }
+
+      .trip-info {
+          flex-grow: 1;
+      }
+
+      .trip-actions {
+          margin-left: 20px;
+      }
+  </style>
 </head>
 <body>
     <%- include('header', { user: user }) %>
-    <h1>Welcome, Passenger!</h1>
-    <!-- Le reste du contenu de la page -->
-    <%- include('footer') %> <!-- Si vous avez un footer à inclure également -->
+    <h1>Welcome, Driver!</h1>
+    <div id="confirmation"></div>
+    <div class="swiper-container">
+        <div class="swiper-wrapper">
+            <% cars.forEach(function(car) { %>
+              <div class="swiper-slide" data-car-id="<%= car._id %>" onclick="selectCar('<%= car._id %>', '<%= car.model %>', '<%= car.seats %>')">
+                <img src="<%= car.image %>" alt="<%= car.model %>" style="max-width:100%; max-height:400px;">
+                    <div class="car-info">
+                        <h3><%= car.model %></h3>
+                        <p>Immatriculation: <%= car.plate %></p>
+                        <p>Moteur: <%= car.engine %> - Sièges: <%= car.seats %></p>
+                        <p>Chevaux: <%= car.horsepower %></p>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+    </div>
+    <form id="trip-form" onsubmit="submitTrip(event)">
+      <input type="hidden" id="selected-car-id" name="carId">
+      <input type="text" id="start-point" name="start" placeholder="Point de départ" required>
+      <input type="text" id="end-point" name="end" placeholder="Point d'arrivée" required>
+      <input type="number" id="price" name="price" placeholder="Prix (en euros)" required>
+      <textarea id="additional-info" name="additionalInfo" placeholder="Informations supplémentaires" rows="4"></textarea>
+      <button type="button" onclick="calculateRoute()">Calculer l'itinéraire</button>
+      <button type="submit">Enregistrer le trajet</button>
+    </form>
+  
+    <div id="route-summary">
+        <h2>Résumé du trajet</h2>
+        <div id="details"></div>
+    </div>
+    <div id="google-map"></div>
+    <div id="trips-list">
+      <% trips.forEach(function(trip) { %>
+        <div class="trip">
+            <div class="trip-content">
+                <div class="trip-info">
+                    <p><strong>Trajet:</strong> De <%= trip.startPoint %> à <%= trip.endPoint %></p>
+                    <div>
+                        <% if(trip.car && trip.car.image) { %>
+                            <img src="<%= trip.car.image %>" alt="Image de la voiture" style="max-width: 200px; max-height: 150px;">
+                        <% } else { %>
+                            <p>Image not available</p>
+                        <% } %>
+                    </div>
+                    <p><strong>Voiture:</strong> <%= trip.car ? trip.car.model : 'Modèle inconnu' %> (<%= trip.car ? trip.car.plate : 'Plaque inconnue' %>)</p>
+                    <p><strong>Départ:</strong> <%= trip.departureTime.toLocaleString('fr-FR', { timeZone: 'UTC' }) %></p>
+                    <p><strong>Sièges disponibles:</strong> <%= trip.seatsAvailable %></p>
+                    <p><strong>Prix:</strong> <%= trip.price %> euros</p>
+                    <p><strong>Informations supplémentaires:</strong> <%= trip.additionalInfo %></p>
+                    <p><strong>Durée:</strong> <%= trip.duration %></p>
+                    <p><strong>Distance:</strong> <%= trip.distance %></p>
+                </div>
+                <div class="trip-actions">
+                    <button onclick="deleteTrip('<%= trip._id %>')">Supprimer</button>
+                </div>
+            </div>
+        </div>
+      <% }); %>
+    </div>
+    
+    <%- include('footer') %>
+    <script src="/swiper/swiper-bundle.min.js"></script>
+    <script>
+        var swiper = new Swiper('.swiper-container', {
+            pagination: { el: '.swiper-pagination' },
+            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+            on: {
+                slideChange: function () {
+                    let activeIndex = swiper.activeIndex;
+                    let slides = document.querySelectorAll('.swiper-slide');
+                    slides.forEach(slide => slide.classList.remove('selected'));
+                    slides[activeIndex].classList.add('selected');
+                }
+            }
+        });
+
+        var map, directionsService, directionsRenderer;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('google-map'), {
+                zoom: 6,
+                center: { lat: 46.2276, lng: 2.2137 }
+            });
+            directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
+            directionsService = new google.maps.DirectionsService();
+        }
+
+        function selectCar(carId, carModel, seats) {
+    console.log('Car selected:', carModel);
+    document.getElementById('selected-car-id').value = carId;
+    document.getElementById('confirmation').innerHTML = carModel + ' selected with ' + seats + ' seats available. Now choose your route.';
+}
+
+
+
+        function calculateRoute() {
+            var start = document.getElementById('start-point').value;
+            var end = document.getElementById('end-point').value;
+            if (start && end) {
+                directionsService.route({
+                    origin: start,
+                    destination: end,
+                    travelMode: 'DRIVING'
+                }, function(response, status) {
+                    if (status === 'OK') {
+                        directionsRenderer.setDirections(response);
+                        var route = response.routes[0];
+                        var summaryPanel = document.getElementById('details');
+                        summaryPanel.innerHTML = 'From: ' + route.legs[0].start_address + '<br>To: ' + route.legs[0].end_address + '<br>Distance: ' + route.legs[0].distance.text + '<br>Duration: ' + route.legs[0].duration.text;
+                    } else {
+                        window.alert('Directions request failed due to ' + status);
+                    }
+                });
+            }
+        }
+
+        function submitTrip(event) {
+    event.preventDefault();
+    var formData = new FormData(document.getElementById('trip-form'));
+    fetch('/create-trip', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            carId: formData.get('carId'),
+            startPoint: formData.get('start'),
+            endPoint: formData.get('end'),
+            price: formData.get('price'),
+            additionalInfo: formData.get('additionalInfo')
+        })
+    }).then(response => response.json())
+    .then(data => {
+        console.log('Trip Created:', data);
+        window.location.reload();
+        var tripHTML = `
+            <div class="trip">
+                <p><strong>Trajet:</strong> De ${formData.get('start')} à ${formData.get('end')}</p>
+                <p><strong>Details:</strong> ${formData.get('additionalInfo')}</p>
+                <p><strong>Prix:</strong> ${formData.get('price')} euros</p>
+                <!-- Add other trip details here -->
+            </div>`;
+        var tripsList = document.getElementById('trips-list');
+        tripsList.insertAdjacentHTML('beforeend', tripHTML);
+        function submitTrip(event) {
+    event.preventDefault();
+    var formData = new FormData(document.getElementById('trip-form'));
+    fetch('/create-trip', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            carId: formData.get('carId'),
+            startPoint: formData.get('start'),
+            endPoint: formData.get('end'),
+            price: formData.get('price'),
+            additionalInfo: formData.get('additionalInfo')
+        })
+    }).then(response => response.json())
+    .then(data => {
+        console.log('Trip Created:', data);
+        var tripHTML = `
+            <div class="trip">
+                <p><strong>Trajet:</strong> De ${formData.get('start')} à ${formData.get('end')}</p>
+                <p><strong>Details:</strong> ${formData.get('additionalInfo')}</p>
+                <p><strong>Prix:</strong> ${formData.get('price')} euros</p>
+                <!-- Add other trip details here -->
+            </div>`;
+        var tripsList = document.getElementById('trips-list');
+        tripsList.insertAdjacentHTML('beforeend', tripHTML);
+        window.location.reload();
+
+    })
+    .catch(error => {
+        console.error('Error creating trip:', error);
+    });
+}
+    })
+    .catch(error => {
+        console.error('Error creating trip:', error);
+    });
+}
+
+        document.addEventListener("DOMContentLoaded", function(event) {
+            initMap();
+        });
+
+        function deleteTrip(tripId) {
+    if (confirm("Are you sure you want to delete this trip?")) {
+        fetch(`/trips/${tripId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'CSRF-Token': 'your_csrf_token_here' 
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '/driverHome';
+            } else {
+                alert('Failed to delete the trip.');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting trip:', error);
+        });
+    }
+}
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=<%= googleMapsApiKey %>&callback=initMap"></script>
 </body>
 </html>

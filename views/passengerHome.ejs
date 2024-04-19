@@ -8,9 +8,51 @@
     <link rel='icon' href='/images/favicon.ico' class='js-favicon'>
 </head>
 <body>
-    <%- include('header', { user: user }) %> <!-- Passez 'user' à 'header' ici -->
+    <%- include('header', { user: user }) %>
     <h1>Welcome, Passenger!</h1>
-    <!-- Le reste du contenu de la page -->
-    <%- include('footer') %> <!-- Si vous avez un footer à inclure également -->
+    
+    <div id="trips-list">
+        <% trips.forEach(function(trip) { %>
+            <div class="trip">
+                <p><strong>Trajet:</strong> De <%= trip.startPoint %> à <%= trip.endPoint %></p>
+                <div>
+                    <img src="<%= trip.car.image %>" alt="Image de la voiture" style="max-width: 200px; max-height: 150px;">
+                </div>
+                <p><strong>Voiture:</strong> <%= trip.car.model %> (<%= trip.car.plate %>)</p>
+                <p><strong>Départ:</strong> <%= trip.departureTime.toLocaleString('fr-FR', { timeZone: 'UTC' }) %></p>
+                <p><strong>Sièges disponibles:</strong> <%= trip.seatsAvailable %></p>
+                <p><strong>Prix:</strong> <%= trip.price %></p>
+                <p><strong>Informations supplémentaires:</strong> <%= trip.additionalInfo %></p>
+                <button onclick="reserveTrip('<%= trip._id %>')">Réserver</button>
+            </div>
+        <% }); %>
+    </div>
+    
+    <%- include('footer') %> 
+
+    <script>
+       // In passengerHome.ejs
+function reserveTrip(tripId) {
+    // Assuming /reserve-trip will do some initial reservation logic
+    fetch('/reserve-trip', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tripId: tripId })
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.href = `/payment?tripId=${tripId}`; // Redirect to payment page with the tripId as a query parameter
+        } else {
+            console.error('Error reserving trip');
+        }
+    })
+    .catch(error => {
+        console.error('Error reserving trip:', error);
+    });
+}
+
+    </script>
 </body>
 </html>
