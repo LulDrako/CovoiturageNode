@@ -3,11 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Règlement de Covoiturage</title>
+    <title>Règlement de EcoCovoit</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 50px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        ol {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 15px;
+        }
+
+        strong {
+            color: #333;
+        }
+
+        .container p {
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .container p:last-child {
+            margin-bottom: 0;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Règlement de Covoiturage</h1>
+
+        <h1>Règlement de EcoCovoit</h1>
         <p>Bienvenue sur notre plateforme de covoiturage ! Pour garantir une expérience de covoiturage sûre et agréable pour tous, veuillez lire attentivement notre règlement :</p>
         
         <ol>
@@ -37,5 +85,7 @@
 
         <p>Merci de votre compréhension et de votre collaboration pour faire de notre communauté de covoiturage une expérience agréable pour tous !</p>
     </div>
+    <%- include('footer') %>
+
 </body>
 </html>

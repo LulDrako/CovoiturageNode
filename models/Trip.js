@@ -32,8 +32,8 @@ const tripSchema = new mongoose.Schema({
     required: true
   },
   additionalInfo: String,
-  duration: String, // Durée du trajet (ex: "2 hours 30 mins")
-  distance: String // Distance du trajet (ex: "150 km")
+  duration: String,
+  distance: String
 }, { timestamps: true });
 
 const Trip = mongoose.model('Trip', tripSchema);

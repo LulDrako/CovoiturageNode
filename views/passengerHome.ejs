@@ -1,4 +1,3 @@
-<!-- passengerHome.ejs -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -31,9 +30,7 @@
     <%- include('footer') %> 
 
     <script>
-       // In passengerHome.ejs
 function reserveTrip(tripId) {
-    // Assuming /reserve-trip will do some initial reservation logic
     fetch('/reserve-trip', {
         method: 'POST',
         headers: {
@@ -43,7 +40,7 @@ function reserveTrip(tripId) {
     })
     .then(response => {
         if (response.ok) {
-            window.location.href = `/payment?tripId=${tripId}`; // Redirect to payment page with the tripId as a query parameter
+            window.location.href = `/payment?tripId=${tripId}`; 
         } else {
             console.error('Error reserving trip');
         }

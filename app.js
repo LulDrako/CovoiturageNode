@@ -49,18 +49,18 @@ app.get('/users/login', function(req, res) {
     res.render('login');
 });
 
-// In app.js
-app.post('/reserve-trip', isAuthenticated, async (req, res) => {
-  const { tripId } = req.body;
-  // Perform reservation logic, e.g., mark the trip as pending payment
-  // ...
-  res.status(200).send(); // Send an OK status
+app.get('/reglement', function(req, res) {
+  res.render('reglement');
 });
 
-// In app.js
+app.post('/reserve-trip', isAuthenticated, async (req, res) => {
+  const { tripId } = req.body;
+
+  res.status(200).send(); 
+});
+
 app.get('/payment', isAuthenticated, async (req, res) => {
-  const { tripId } = req.query; // Retrieve the tripId from the query parameter
-  // Render the payment page, passing the tripId to it
+  const { tripId } = req.query; 
   res.render('payment', { tripId });
 });
 

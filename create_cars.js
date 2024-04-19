@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Car = require('./models/Car'); // Le chemin d'accès au modèle de voiture
+const Car = require('./models/Car');
 
 mongoose.connect('mongodb://localhost:27017/EcoCovoit', {
   useNewUrlParser: true,
