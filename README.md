@@ -32,11 +32,21 @@ Le projet utilise :
 
 Voici quelques captures d'écran du projet pour illustrer l'interface utilisateur :
 
-![Screenshot 1](link-to-image-1)
-![Screenshot 2](link-to-image-2)
-![Screenshot 3](link-to-image-3)
+![alt text](image-6.png)
 
-(Remplacez les liens ci-dessus par les vrais chemins vers vos images)
+![alt text](image.png)
+
+![alt text](image-1.png)
+
+![alt text](image-2.png)
+
+![alt text](image-4.png)
+
+![alt text](image-5.png)
+
+![alt text](image-7.png)
+
+![alt text](image-3.png)
 
 ## Installation
 
@@ -48,10 +58,14 @@ Voici quelques captures d'écran du projet pour illustrer l'interface utilisateu
    ```bash
    npm install
    ```
-3. Créez un fichier `.env` pour la configuration des variables d'environnement (comme la connexion à MongoDB).
+3. Créez un fichier `.env` pour la configuration des variables d'environnement (comme la connexion à MongoDB). Exemple de contenu :
+   ```bash
+   DB_CONNECTION_STRING=your_mongodb_connection_string
+   API_KEY=your_api_key
+   ```
 4. Démarrez le serveur :
    ```bash
-   npm start
+   node app.js
    ```
 
 ## Fonctionnalités futures
