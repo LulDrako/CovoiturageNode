@@ -1,4 +1,3 @@
-
 # EcoCovoit
 
 **Statut** : En développement
