@@ -18,8 +18,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const mongoURL = process.env.MONGO_URL
 
-console.log("🔍 MONGODB_URL:", process.env.MONGO_URL);
-
 mongoose.connect(mongoURL, {
   useNewUrlParser: true,
   useUnifiedTopology: true
