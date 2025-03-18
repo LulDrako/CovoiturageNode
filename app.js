@@ -16,7 +16,7 @@ const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URL)
   .then(() => console.log("MongoDB connected successfully"))
   .catch(err => console.error("MongoDB connection error:", err));
 
