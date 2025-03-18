@@ -17,7 +17,7 @@ const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 
 const mongoURL = process.env.MONGODB_URL
-
+// Connexion à MongoDB
 mongoose.connect(mongoURL, {
   useNewUrlParser: true,
   useUnifiedTopology: true
