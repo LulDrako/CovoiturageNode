@@ -18,10 +18,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const mongoURL = process.env.MONGO_URL
 
-mongoose.connect(mongoURL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(mongoURL)
   .then(() => console.log(`✅ MongoDB connecté avec l'URL: ${process.env.NODE_ENV === 'production' ? "[HIDDEN]" : mongoURL}`))
   .catch(err => {
     console.error("❌ Erreur de connexion MongoDB:", err);
