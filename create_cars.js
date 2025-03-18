@@ -1,10 +1,13 @@
 const mongoose = require('mongoose');
 const Car = require('./models/Car');
 
-mongoose.connect('mongodb://localhost:27017/EcoCovoit', {
+mongoose.connect(process.env.MONGODB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true
-});
+})
+.then(() => console.log("✅ Connecté à MongoDB Railway"))
+.catch(err => console.error("❌ Erreur MongoDB :", err));
+
 
 const cars = [
   { model: 'Peugeot 208', plate: 'AB-123-CD', seats: 5, horsepower: 100, engine: 'Essence', image: 'https://www.largus.fr/images/2023-09/Peugeot-e-208-restylee-2023-015.jpg' },
@@ -31,11 +34,8 @@ const cars = [
 
 
 Car.insertMany(cars)
-  .then(() => {
-    console.log('Voitures ajoutées avec succès');
-    mongoose.connection.close();
-  })
-  .catch((error) => {
-    console.error('Erreur lors de l\'ajout des voitures', error);
-    mongoose.connection.close();
-  });
+    .then(() => {
+        console.log('✅ Voitures ajoutées avec succès');
+        mongoose.connection.close();
+    })
+    .catch(err => console.error("❌ Erreur lors de l'insertion :", err));
