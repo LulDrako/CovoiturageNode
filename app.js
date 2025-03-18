@@ -16,10 +16,17 @@ const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-mongoose.connect(process.env.MONGODB_URL)
-  .then(() => console.log("MongoDB connected successfully"))
-  .catch(err => console.error("MongoDB connection error:", err));
-
+// Connexion à MongoDB
+mongoose.connect(process.env.MONGODB_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+  .then(() => console.log(`✅ MongoDB connecté avec l'URL: ${process.env.MONGODB_URL}`))
+  .catch(err => {
+    console.error("❌ Erreur de connexion MongoDB:", err);
+    process.exit(1);
+  });
+  
 app.use(session({
   secret: 'une_chaine_secrete_complexe',
   resave: false,
