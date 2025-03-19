@@ -25,7 +25,7 @@
             <option value="Hybride">Hybride</option>
         </select>
     
-        <input type="file" id="car-image" name="car-image" accept="image/*" required>
+        <input type="text" id="car-image-url" name="image" placeholder="URL de l'image" required>
         
         <button type="submit">Ajouter la voiture</button>
     </form>
@@ -55,6 +55,7 @@
         <input type="text" id="start-point" name="start" placeholder="Point de départ" required>
         <input type="text" id="end-point" name="end" placeholder="Point d'arrivée" required>
         <input type="number" id="price" name="price" placeholder="Prix (en euros)" required>
+        <input type="datetime-local" id="departure-time" name="departureTime" required>
         <textarea id="additional-info" name="additionalInfo" placeholder="Informations supplémentaires" rows="4"></textarea>
         <button type="button" onclick="calculateRoute()">Calculer l'itinéraire</button>
         <button type="submit">Enregistrer le trajet</button>
@@ -66,37 +67,65 @@
             <p><strong>À :</strong> <span id="end-address"></span></p>
             <p><strong>Distance :</strong> <span id="distance"></span></p>
             <p><strong>Durée :</strong> <span id="duration"></span></p>
+            <p><strong>Heure d'arrivée estimée :</strong> <span id="arrival-time"></span></p>
         </div>
     </div>    
     <div id="google-map"></div>
     <div id="trips-list">
         <% trips.forEach(function(trip) { %>
-          <div class="trip">
-              <div class="trip-content">
-                  <div class="trip-info">
-                      <p><strong>Trajet:</strong> De <%= trip.startPoint %> à <%= trip.endPoint %></p>
-                      <div>
-                          <% if(trip.car && trip.car.image) { %>
-                              <img src="<%= trip.car.image %>" alt="Image de la voiture" style="max-width: 200px; max-height: 150px;">
-                          <% } else { %>
-                              <p>Image not available</p>
-                          <% } %>
-                      </div>
-                      <p><strong>Voiture:</strong> <%= trip.car ? trip.car.model : 'Modèle inconnu' %> (<%= trip.car ? trip.car.plate : 'Plaque inconnue' %>)</p>
-                      <p><strong>Départ:</strong> <%= trip.departureTime.toLocaleString('fr-FR', { timeZone: 'UTC' }) %></p>
-                      <p><strong>Sièges disponibles:</strong> <%= trip.seatsAvailable %></p>
-                      <p><strong>Prix:</strong> <%= trip.price %> euros</p>
-                      <p><strong>Informations supplémentaires:</strong> <%= trip.additionalInfo %></p>
-                      <p><strong>Durée:</strong> <%= trip.duration %></p>
-                      <p><strong>Distance:</strong> <%= trip.distance %></p>
-                  </div>
-                  <div class="trip-actions">
-                      <button onclick="deleteTrip('<%= trip._id %>')">Supprimer</button>
-                  </div>
-              </div>
-          </div>
+            <div class="trip">
+                <div class="trip-content">
+                    <div class="trip-info">
+                        <p><strong>Trajet:</strong> De <%= trip.startPoint %> à <%= trip.endPoint %></p>
+                        <div>
+                            <% if (trip.car && trip.car.image) { %>
+                                <img src="<%= trip.car.image %>" alt="Image de la voiture" style="max-width: 200px; max-height: 150px;">
+                            <% } else { %>
+                                <p>Image not available</p>
+                            <% } %>
+                        </div>
+                        <p><strong>Voiture:</strong> <%= trip.car ? trip.car.model : 'Modèle inconnu' %> (<%= trip.car ? trip.car.plate : 'Plaque inconnue' %>)</p>
+                        
+                        <p><strong>Départ:</strong> 
+                            <%= new Date(trip.departureTime).toLocaleString('fr-FR', {
+                                weekday: 'long',
+                                day: '2-digit',
+                                month: 'long',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            }) %>
+                        </p>
+    
+                        <% if (trip.arrivalTime) { %>
+                            <p><strong>Heure d'arrivée estimée:</strong> 
+                                <%= new Date(trip.arrivalTime).toLocaleString('fr-FR', {
+                                    weekday: 'long',
+                                    day: '2-digit',
+                                    month: 'long',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }) %>
+                            </p>
+                        <% } else { %>
+                            <p><strong>Heure d'arrivée estimée:</strong> Non disponible</p>
+                        <% } %>
+    
+                        <p><strong>Sièges disponibles:</strong> <%= trip.seatsAvailable %></p>
+                        <p><strong>Prix:</strong> <%= trip.price %> euros</p>
+                        <p><strong>Informations supplémentaires:</strong> <%= trip.additionalInfo %></p>
+                        <p><strong>Durée:</strong> <%= trip.duration %></p>
+                        <p><strong>Distance:</strong> <%= trip.distance %></p>
+                    </div>
+                    <div class="trip-actions">
+                        <button onclick="deleteTrip('<%= trip._id %>')">Supprimer</button>
+                    </div>
+                </div>
+            </div>
         <% }); %>
-      </div>
+    </div>
+    
 
     <%- include('footer') %>
 

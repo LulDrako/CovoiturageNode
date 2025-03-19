@@ -83,9 +83,24 @@ app.get('/logout', function(req, res) {
 app.post('/add-car', async (req, res) => {
   try {
       const { model, seats, plate, horsepower, engine, image } = req.body;
-      const newCar = new Car({ model, seats, plate, horsepower, engine, image });
+
+      // Vérifier que l'image est bien une URL
+      if (!image.startsWith('http')) {
+          return res.status(400).json({ error: "L'URL de l'image est invalide." });
+      }
+
+      const newCar = new Car({
+          model,
+          seats,
+          plate,
+          horsepower,
+          engine,
+          image
+      });
+
       await newCar.save();
       res.json({ message: 'Voiture ajoutée avec succès', car: newCar });
+
   } catch (error) {
       console.error('Erreur lors de l\'ajout de la voiture:', error);
       res.status(500).json({ error: 'Erreur interne du serveur' });
@@ -95,19 +110,25 @@ app.post('/add-car', async (req, res) => {
 
 
 app.post('/create-trip', isAuthenticated, async function(req, res) {
-  const { carId, startPoint, endPoint, price, additionalInfo } = req.body;
+  const { carId, startPoint, endPoint, price, additionalInfo, departureTime } = req.body;
 
   try {
     if (!carId) {
-      return res.status(400).json({ error: 'Car ID is required' });
+      return res.status(400).json({ error: 'Veuillez choisir une voiture' });
     }
 
     const car = await Car.findById(carId);
-
     if (!car) {
-      return res.status(404).json({ error: 'Car not found' });
+      return res.status(404).json({ error: 'Voiture inrouvable' });
     }
 
+    // Vérifier que la date de départ est valide
+    const departureDate = new Date(departureTime);
+    if (isNaN(departureDate.getTime()) || departureDate < new Date()) {
+      return res.status(400).json({ error: "L'heure de départ est invalide ou déjà passée." });
+    }
+
+    // Calcul de la durée du trajet avec l’API Google Maps
     const response = await axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${startPoint}&destination=${endPoint}&key=${process.env.GOOGLE_MAPS_API_KEY}`);
     
     if (!response.data || !response.data.routes || response.data.routes.length === 0) {
@@ -115,41 +136,47 @@ app.post('/create-trip', isAuthenticated, async function(req, res) {
     }
 
     const route = response.data.routes[0];
-
     if (!route.legs || route.legs.length === 0) {
       return res.status(404).json({ error: 'No legs found in the route' });
     }
 
     const duration = route.legs[0].duration.text;
     const distance = route.legs[0].distance.text;
+    const durationSeconds = route.legs[0].duration.value; // Durée en secondes
 
+    // ✅ Calcul de l’heure d’arrivée correcte
+    const arrivalDate = new Date(departureDate.getTime() + durationSeconds * 1000);
+
+    // ✅ Création et sauvegarde du trajet
     const trip = new Trip({
       driver: req.user._id,
       car: car._id, 
-      startPoint: startPoint,
-      endPoint: endPoint,
-      departureTime: new Date(),
+      startPoint,
+      endPoint,
+      departureTime: departureDate,
+      arrivalTime: arrivalDate, // Ajout de l’heure d’arrivée
       seatsAvailable: car.seats,
-      price: price,
-      additionalInfo: additionalInfo,
-      duration: duration,
-      distance: distance
+      price,
+      additionalInfo,
+      duration,
+      distance
     });
 
     await trip.save();
+    res.json({ message: 'Trajet créé avec succès !', trip });
 
-    res.json({ message: 'Trip created successfully', trip });
   } catch (error) {
     console.error('Error creating trip:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
+
 app.post('/trips/:id/delete', isAuthenticated, async (req, res) => {
   try {
       const result = await Trip.findByIdAndDelete(req.params.id);
       if (!result) {
-          return res.status(404).send("Trip not found");
+          return res.status(404).send("Trajer introuvable");
       }
       res.redirect('/driverHome'); 
   } catch (error) {

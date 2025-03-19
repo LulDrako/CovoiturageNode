@@ -23,6 +23,10 @@ const tripSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
+  arrivalTime: {
+    type: Date,
+    required: true
+  },
   seatsAvailable: {
     type: Number,
     required: true
