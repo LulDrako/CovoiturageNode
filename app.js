@@ -80,6 +80,19 @@ app.get('/logout', function(req, res) {
   });
 });
 
+app.post('/add-car', async (req, res) => {
+  try {
+      const { model, seats, plate, horsepower, engine, image } = req.body;
+      const newCar = new Car({ model, seats, plate, horsepower, engine, image });
+      await newCar.save();
+      res.json({ message: 'Voiture ajoutée avec succès', car: newCar });
+  } catch (error) {
+      console.error('Erreur lors de l\'ajout de la voiture:', error);
+      res.status(500).json({ error: 'Erreur interne du serveur' });
+  }
+});
+
+
 
 app.post('/create-trip', isAuthenticated, async function(req, res) {
   const { carId, startPoint, endPoint, price, additionalInfo } = req.body;
