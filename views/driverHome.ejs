@@ -115,7 +115,9 @@
                         <p><strong>Sièges disponibles:</strong> <%= trip.seatsAvailable %></p>
                         <p><strong>Prix:</strong> <%= trip.price %> euros</p>
                         <p><strong>Informations supplémentaires:</strong> <%= trip.additionalInfo %></p>
-                        <p><strong>Durée:</strong> <%= trip.duration %></p>
+                        <p><strong>Durée:</strong>
+                            <%= trip.duration.replace("hours", "heures").replace("mins", "minutes") %>
+                        </p>
                         <p><strong>Distance:</strong> <%= trip.distance %></p>
                     </div>
                     <div class="trip-actions">

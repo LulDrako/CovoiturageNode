@@ -8,20 +8,60 @@
 </head>
 <body>
     <%- include('header', { user: user }) %>
-    <h1>Welcome, Passenger!</h1>
+    <h1>Bienvenue, Passager !</h1>
     
     <div id="trips-list">
         <% trips.forEach(function(trip) { %>
             <div class="trip">
                 <p><strong>Trajet:</strong> De <%= trip.startPoint %> à <%= trip.endPoint %></p>
+                
                 <div>
-                    <img src="<%= trip.car.image %>" alt="Image de la voiture" style="max-width: 200px; max-height: 150px;">
+                    <% if (trip.car && trip.car.image) { %>
+                        <img src="<%= trip.car.image %>" alt="Image de la voiture" style="max-width: 200px; max-height: 150px;">
+                    <% } else { %>
+                        <p>Image indisponible</p>
+                    <% } %>
                 </div>
-                <p><strong>Voiture:</strong> <%= trip.car.model %> (<%= trip.car.plate %>)</p>
-                <p><strong>Départ:</strong> <%= trip.departureTime.toLocaleString('fr-FR', { timeZone: 'UTC' }) %></p>
+
+                <p><strong>Voiture:</strong> <%= trip.car ? trip.car.model : 'Modèle inconnu' %> 
+                    (<%= trip.car ? trip.car.plate : 'Plaque inconnue' %>)</p>
+                
+                <p><strong>Départ:</strong> 
+                    <%= new Date(trip.departureTime).toLocaleString('fr-FR', {
+                        weekday: 'long',
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) %>
+                </p>
+
+                <% if (trip.arrivalTime) { %>
+                    <p><strong>Heure d'arrivée estimée:</strong> 
+                        <%= new Date(trip.arrivalTime).toLocaleString('fr-FR', {
+                            weekday: 'long',
+                            day: '2-digit',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        }) %>
+                    </p>
+                <% } else { %>
+                    <p><strong>Heure d'arrivée estimée:</strong> Non disponible</p>
+                <% } %>
+
                 <p><strong>Sièges disponibles:</strong> <%= trip.seatsAvailable %></p>
-                <p><strong>Prix:</strong> <%= trip.price %></p>
+                <p><strong>Prix:</strong> <%= trip.price %> euros</p>
                 <p><strong>Informations supplémentaires:</strong> <%= trip.additionalInfo %></p>
+                
+                <p><strong>Durée:</strong> 
+                    <%= trip.duration.replace("hours", "heures").replace("mins", "minutes") %>
+                </p>
+
+                <p><strong>Distance:</strong> <%= trip.distance %></p>
+
                 <button onclick="reserveTrip('<%= trip._id %>')">Réserver</button>
             </div>
         <% }); %>
@@ -30,26 +70,23 @@
     <%- include('footer') %> 
 
     <script>
-function reserveTrip(tripId) {
-    fetch('/reserve-trip', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ tripId: tripId })
-    })
-    .then(response => {
-        if (response.ok) {
-            window.location.href = `/payment?tripId=${tripId}`; 
-        } else {
-            console.error('Error reserving trip');
+        function reserveTrip(tripId) {
+            fetch('/reserve-trip', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tripId: tripId })
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = `/payment?tripId=${tripId}`;
+                } else {
+                    console.error('Erreur lors de la réservation');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la réservation:', error);
+            });
         }
-    })
-    .catch(error => {
-        console.error('Error reserving trip:', error);
-    });
-}
-
     </script>
 </body>
 </html>
