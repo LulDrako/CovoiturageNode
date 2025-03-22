@@ -169,19 +169,7 @@
         }
         
         document.addEventListener("DOMContentLoaded", function () {
-            // Init Google Maps
-            initMap();
-        
-            // ➤ Départ min datetime
-            let departureInput = document.getElementById("departure-time");
-            if (departureInput) {
-                let now = new Date();
-                let localISOTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-                    .toISOString()
-                    .slice(0, 16);
-                departureInput.min = localISOTime;
-            }
-        
+            
             // ➤ Plaque auto-format
             const plateInput = document.getElementById("plate");
             if (plateInput) {
@@ -206,6 +194,18 @@
                     }
                 });
             }
+        
+            // ➤ Départ min datetime
+            let departureInput = document.getElementById("departure-time");
+            if (departureInput) {
+                let now = new Date();
+                let localISOTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+                    .toISOString()
+                    .slice(0, 16);
+                departureInput.min = localISOTime;
+            }
+        
+
         
             // ➤ Validation du formulaire voiture
             const carForm = document.getElementById("add-car-form");
@@ -244,4 +244,6 @@
                     submitCar(event);
                 });
             }
+            // Init Google Maps
+            initMap();
         });

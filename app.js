@@ -237,6 +237,32 @@ app.get('/passengerHome', isAuthenticated, async function(req, res) {
   }
 });
 
+app.post('/search-trips', isAuthenticated, async (req, res) => {
+  const { start, end, date } = req.body;
+
+  try {
+    const dayStart = new Date(date);
+    const dayEnd = new Date(date);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    const trips = await Trip.find({
+      startPoint: { $regex: new RegExp(start, 'i') },
+      endPoint: { $regex: new RegExp(end, 'i') },
+      departureTime: { $gte: dayStart, $lte: dayEnd }
+    }).populate('car').populate('driver');
+
+    res.render('searchResults', {
+      title: 'Résultats de recherche',
+      user: req.user,
+      trips
+    });
+  } catch (error) {
+    console.error("Erreur recherche trajets:", error);
+    res.status(500).send("Erreur interne");
+  }
+});
+
+
 
 app.post("/users/signup", async (req, res) => {
   try {

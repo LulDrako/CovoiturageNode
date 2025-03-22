@@ -1,101 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <%- include('partials/head') %>
+<body>
 <%- include('partials/header', { user: user }) %>
 
-<h1>Bienvenue, Passager !</h1>
+<div class="search-page">
+  <h1>Trouve ton prochain trajet</h1>
 
-<div class="search-container">
-    <h2>Rechercher un trajet</h2>
-    <form id="search-form">
-        <input type="text" id="search-start" placeholder="Lieu de départ">
-        <input type="text" id="search-end" placeholder="Lieu d'arrivée">
-        <input type="date" id="search-date">
-        <button type="submit">🔍 Rechercher</button>
-    </form>
+  <form action="/search-trips" method="POST" class="search-form">
+    <input type="text" name="start" placeholder="Ville de départ" required>
+    <input type="text" name="end" placeholder="Ville d’arrivée" required>
+    <input type="date" name="date" required>
+    <button type="submit">Rechercher un trajet</button>
+  </form>
 </div>
-
-<% if (trips.length === 0) { %>
-    <p style="text-align: center; font-size: 18px; margin-top: 30px;">🚗 Aucun trajet disponible pour le moment.</p>
-<% } else { %>
-    <div id="trips-list">
-        <% trips.forEach(function(trip) { %>
-            <div class="trip">
-                <p><strong>Trajet:</strong> De <%= trip.startPoint %> à <%= trip.endPoint %></p>
-                <p><strong>Conducteur(ice) :</strong> <%= trip.driver ? trip.driver.username : "Nom inconnu" %></p>
-                <div>
-                    <% if (trip.car && trip.car.image) { %>
-                        <img src="<%= trip.car.image %>" alt="Image de la voiture" style="max-width: 200px; max-height: 150px;">
-                    <% } else { %>
-                        <p>Image indisponible</p>
-                    <% } %>
-                </div>
-                <p><strong>Voiture:</strong> <%= trip.car?.model || 'Modèle inconnu' %> (<%= trip.car?.plate || 'Plaque inconnue' %>)</p>
-                <p><strong>Départ:</strong> 
-                    <%= new Date(trip.departureTime).toLocaleString('fr-FR', {
-                        weekday: 'long',
-                        day: '2-digit',
-                        month: 'long',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }) %>
-                </p>
-                <% if (trip.arrivalTime) { %>
-                    <p><strong>Heure d'arrivée estimée:</strong> 
-                        <%= new Date(trip.arrivalTime).toLocaleString('fr-FR', {
-                            weekday: 'long',
-                            day: '2-digit',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        }) %>
-                    </p>
-                <% } else { %>
-                    <p><strong>Heure d'arrivée estimée:</strong> Non disponible</p>
-                <% } %>
-                <p><strong>Sièges disponibles:</strong> <%= trip.seatsAvailable %></p>
-                <p><strong>Prix:</strong> <%= trip.price %> euros</p>
-                <p><strong>Informations supplémentaires:</strong> <%= trip.additionalInfo %></p>
-                <p><strong>Durée:</strong> <%= trip.duration.replace("hours", "heures").replace("mins", "minutes") %></p>
-                <p><strong>Distance:</strong> <%= trip.distance %></p>
-                <button onclick="reserveTrip('<%= trip._id %>')">Réserver</button>
-            </div>
-        <% }); %>
-    </div>
-<% } %>
 
 <%- include('partials/footer') %>
 
-<!-- SCRIPTS -->
-<script>
-    function reserveTrip(tripId) {
-        fetch('/reserve-trip', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tripId })
-        })
-        .then(response => {
-            if (response.ok) {
-                window.location.href = `/payment?tripId=${tripId}`;
-            } else {
-                console.error('Erreur lors de la réservation');
-            }
-        })
-        .catch(error => {
-            console.error('Erreur lors de la réservation:', error);
-        });
-    }
+<style>
+.search-page {
+  text-align: center;
+  margin-top: 80px;
+}
 
-    document.getElementById("search-form").addEventListener("submit", function (e) {
-        e.preventDefault();
-        const start = document.getElementById("search-start").value.toLowerCase();
-        const end = document.getElementById("search-end").value.toLowerCase();
-        const date = document.getElementById("search-date").value;
+.search-form {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
 
-        const trips = document.querySelectorAll(".trip");
-        trips.forEach(trip => {
-            const tripText = trip.innerText.toLowerCase();
-            const show = tripText.includes(start) && tripText.includes(end) && (!date || tripText.includes(date));
-            trip.style.display = show ? "block" : "none";
-        });
-    });
-</script>
+.search-form input,
+.search-form button {
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.search-form button {
+  background-color: #4CAF50;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.search-form button:hover {
+  background-color: #3d9442;
+}
+</style>

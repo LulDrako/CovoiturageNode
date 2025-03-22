@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
     <%- include('partials/head') %>
-</head>
 <body>
     <%- include('partials/header', { user: user }) %>
 
@@ -127,9 +125,15 @@
 
     <%- include('partials/footer') %>
 
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=<%= googleMapsApiKey %>&callback=initMap"></script>
+
 <script src="/swiper/swiper-bundle.min.js"></script>
 <script src="/js/driverHome.js"></script>
+<script src="/js/googleMapsDriver.js"></script>
+<script
+    async defer
+    src="https://maps.googleapis.com/maps/api/js?key=<%= googleMapsApiKey %>&libraries=places&callback=initGoogleMapsStuff">
+  </script>
+
 
 </body>
 </html>

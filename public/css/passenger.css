@@ -5,6 +5,13 @@ body {
     padding: 0;
 }
 
+/* TITRES */
+h1, h2 {
+    text-align: center;
+    color: #007bff;
+}
+
+/* CONTAINER PRINCIPAL */
 .container {
     max-width: 900px;
     margin: 20px auto;
@@ -14,9 +21,48 @@ body {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
+/* 🔍 PAGE DE RECHERCHE */
+.search-page {
     text-align: center;
-    color: #007bff;
+    margin-top: 80px;
+}
+
+.search-form {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.search-form input,
+.search-form button {
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.search-form button {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.search-form button:hover {
+    background-color: #3d9442;
+}
+
+/* 🔁 AFFICHAGE DES TRAJETS */
+#trips-list {
+    max-width: 900px;
+    margin: 30px auto;
 }
 
 .trip {
@@ -24,6 +70,7 @@ h1 {
     padding: 15px;
     margin: 15px 0;
     border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .trip img {
@@ -31,6 +78,7 @@ h1 {
     border-radius: 8px;
 }
 
+/* 🟦 BOUTONS GÉNÉRAUX */
 button {
     display: block;
     width: 100%;
@@ -40,13 +88,14 @@ button {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: 0.3s;
+    transition: background 0.3s;
 }
 
 button:hover {
     background: #0056b3;
 }
 
+/* 🔍 VERSION LÉGÈRE (optionnelle) POUR PAGE D’ACCUEIL DE PASSAGER */
 .search-container {
     max-width: 600px;
     margin: 30px auto;

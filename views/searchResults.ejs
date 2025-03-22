@@ -1,0 +1,73 @@
+<%- include('partials/header', { user: user }) %>
+
+<h1 style="text-align:center;">🛣️ Résultats de votre recherche</h1>
+
+<% if (trips.length === 0) { %>
+  <p style="text-align:center; margin-top: 30px;">Aucun trajet trouvé pour cette date et cet itinéraire.</p>
+<% } else { %>
+  <div class="trip-results">
+    <% trips.forEach(function(trip) { %>
+      <div class="trip-card">
+        <h3>🚗 De <%= trip.startPoint %> à <%= trip.endPoint %></h3>
+        <p><strong>Conducteur:</strong> <%= trip.driver?.username || 'Inconnu' %></p>
+        <% if (trip.car?.image) { %>
+          <img src="<%= trip.car.image %>" alt="voiture" />
+        <% } %>
+        <p><strong>Voiture:</strong> <%= trip.car?.model || '-' %> (<%= trip.car?.plate || '-' %>)</p>
+        <p><strong>Départ:</strong> <%= new Date(trip.departureTime).toLocaleString('fr-FR') %></p>
+        <p><strong>Arrivée estimée:</strong> 
+          <%= trip.arrivalTime ? new Date(trip.arrivalTime).toLocaleString('fr-FR') : 'Non disponible' %>
+        </p>
+        <p><strong>Durée:</strong> <%= trip.duration %></p>
+        <p><strong>Distance:</strong> <%= trip.distance %></p>
+        <p><strong>Sièges:</strong> <%= trip.seatsAvailable %></p>
+        <p><strong>Prix:</strong> <%= trip.price %>€</p>
+        <form action="/reserve-trip" method="POST">
+          <input type="hidden" name="tripId" value="<%= trip._id %>">
+          <button type="submit">Réserver</button>
+        </form>
+      </div>
+    <% }); %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>
+
+<style>
+.trip-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+  padding: 40px;
+}
+
+.trip-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  text-align: left;
+}
+
+.trip-card img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+.trip-card form {
+  margin-top: 10px;
+}
+
+.trip-card button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 10px 15px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+</style>
