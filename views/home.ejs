@@ -1,76 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Bienvenue chez EcoCovoit</title>
-    <link rel="stylesheet" href="/stylesheets/style.css">
-    <link rel='icon' href='/images/favicon.ico' class='js-favicon'>
-    <style>
-        .video-container {
-            max-width: 800px;
-            margin: 0 auto;
-            margin-bottom: 20px;
-            position: relative;
-            padding-bottom: 55%; 
-            overflow: hidden;
-        }
-        
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-    
-        h1 {
-            text-align: center;
-        }
-
-        p {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        nav {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        nav ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        nav ul li {
-            display: inline;
-        }
-
-        nav ul li a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-            font-size: 18px; 
-            padding: 10px;
-        }
-
-        nav ul li:not(:last-child) a:after {
-            content: "|";
-            padding-left: 10px;
-            padding-right: 20px;
-            margin-left: 55px;
-        }
-
-        .logo {
-            display: block;
-            max-width: 200px;
-            margin: 0 auto;
-            margin-bottom: 40px;
-        }
-    </style>
-</head>
-<body>
+    <%- include('partials/head') %>
+    <body>
     <header>
         <img src="/images/logo_ecocovoit.png" alt="Logo EcoCovoit" class="logo">
         <nav>
@@ -80,7 +11,7 @@
             </ul>
         </nav>
     </header>
-    <h1>Bienvenue chez EcoCovoit</h1>
+    <h1>Bienvenue chez KovoitGo</h1>
     <p>Votre solution de covoiturage écoresponsable !</p>
     <div class="video-container">
         <iframe src="/images/Covoiturage _ avantages et inconvénients.mp4" autoplay controls></iframe>

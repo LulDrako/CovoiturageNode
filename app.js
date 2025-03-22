@@ -25,11 +25,17 @@ mongoose.connect(mongoURL)
     process.exit(1);
   });
 
-app.use(session({
-  secret: 'une_chaine_secrete_complexe',
-  resave: false,
-  saveUninitialized: false,
-}));
+  app.use(session({
+    secret: 'une_chaine_secrete_complexe',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 10 * 60 * 60 * 1000,  // ✅ Expire après 24h
+      httpOnly: true,  // ✅ Empêche l'accès aux cookies par JS
+      secure: process.env.NODE_ENV === 'production'  // ✅ Active en HTTPS seulement en production
+    }
+  }));
+  
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -42,20 +48,20 @@ app.get('/', function(req, res) {
     const redirectPath = req.session.role === 'driver' ? '/driverHome' : '/passengerHome';
     res.redirect(redirectPath);
   } else {
-    res.render('home', { title: 'Bienvenue' });
+    res.render('home', { title: 'Bienvenue sur KovoitGo', pageCss: 'home' });
   }
 });
 
 app.get('/users/signup', function(req, res) {
-  res.render('signup');
+  res.render('signup', { title: 'Inscription - KovoitGo', pageCss: 'signup' });
 });
 
 app.get('/users/login', function(req, res) {
-    res.render('login');
+  res.render('login', { title: 'Connexion - KovoitGo', pageCss: 'login' });
 });
 
 app.get('/reglement', function(req, res) {
-  res.render('reglement');
+  res.render('reglement', { title: 'Réglement - KovoitGo', pageCss: 'reglement' });
 });
 
 app.post('/reserve-trip', isAuthenticated, async (req, res) => {
@@ -80,7 +86,7 @@ app.get('/logout', function(req, res) {
   });
 });
 
-app.post('/add-car', async (req, res) => {
+app.post('/add-car', isAuthenticated, async (req, res) => {
   try {
       const { model, seats, plate, horsepower, engine, image } = req.body;
 
@@ -90,6 +96,7 @@ app.post('/add-car', async (req, res) => {
       }
 
       const newCar = new Car({
+        owner: req.user._id,  // ✅ Lier la voiture à l'utilisateur
           model,
           seats,
           plate,
@@ -186,41 +193,40 @@ app.post('/trips/:id/delete', isAuthenticated, async (req, res) => {
 });
 
 
-
-
 app.get('/driverHome', isAuthenticated, async function(req, res) {
   if (req.user.role === 'driver') {
-    try {
-      const cars = await Car.find();
-      const trips = await Trip.find({ driver: req.user._id }).populate('car');
-      
+      try {
+          const cars = await Car.find({ owner: req.user._id }); // ✅ Seules ses voitures
+          const trips = await Trip.find({ driver: req.user._id }).populate('car');
 
-      res.render('driverHome', {
-        title: 'Espace Conducteur',
-        user: req.user,
-        cars: cars,
-        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
-        trips: trips,
-      });
-    } catch (error) {
-      console.error('Error retrieving cars:', error);
-      res.status(500).send("Internal server error.");
-    }
+          res.render('driverHome', {
+              title: 'Espace Conducteur',
+              user: req.user,
+              cars: cars,
+              trips: trips,
+              googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+              pageCss: 'driver'
+
+          });
+      } catch (error) {
+          console.error('Erreur lors de la récupération des voitures:', error);
+          res.status(500).send("Erreur interne du serveur.");
+      }
   } else {
-    res.redirect('/passengerHome');
+      res.redirect('/passengerHome');
   }
 });
-
 
 
 app.get('/passengerHome', isAuthenticated, async function(req, res) {
   if(req.user.role === 'passenger') {
     try {
-      const trips = await Trip.find().populate('car');
+      const trips = await Trip.find().populate('car').populate('driver');
       res.render('passengerHome', {
         title: 'Espace Passager',
         user: req.user,
-        trips: trips
+        trips: trips,
+        pageCss: 'passenger'
       });
     } catch (error) {
       console.error('Erreur lors de la récupération des trajets:', error);
@@ -230,6 +236,8 @@ app.get('/passengerHome', isAuthenticated, async function(req, res) {
     res.redirect('/driverHome');
   }
 });
+
+
 app.post("/users/signup", async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
@@ -266,25 +274,20 @@ app.post("/users/signup", async (req, res) => {
       .json({ error: "Erreur lors de l'inscription. Veuillez réessayer." });
   }
 });
- 
+
+
 app.post("/users/login", async (req, res) => {
   const { email, password } = req.body;
   console.log("Tentative de connexion avec email:", email);
-  console.log("Données de connexion reçues:", { email, password });
- 
+
   try {
     const user = await User.findOne({ email }).exec();
     if (!user) {
       console.log("Aucun utilisateur trouvé avec cet email:", email);
       return res.status(401).send("Email ou mot de passe incorrect.");
     }
- 
-    console.log("Mot de passe soumis (clair):", password);
-    console.log("Mot de passe stocké (haché):", user.hashedPassword);
- 
-    const isMatch = user.comparePassword(password);
-    console.log("Le mot de passe correspond-il ?:", isMatch);
- 
+
+    const isMatch = await bcrypt.compare(password, user.hashedPassword);
     if (isMatch) {
       req.session.userId = user._id;
       req.session.role = user.role;
@@ -299,6 +302,8 @@ app.post("/users/login", async (req, res) => {
     res.status(500).send("Erreur interne du serveur.");
   }
 });
+
+
 
 // app.js
 app.post('/process-payment', isAuthenticated, async (req, res) => {

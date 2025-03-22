@@ -1,18 +1,14 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Espace Conducteur</title>
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="icon" href='/images/favicon.ico' type="image/x-icon">
-    <link rel="stylesheet" href="/swiper/swiper-bundle.css">
+    <%- include('partials/head') %>
 </head>
 <body>
-    <%- include('header', { user: user }) %>
+    <%- include('partials/header', { user: user }) %>
 
     <h1>Bienvenue Conducteur !</h1>
     <h2>Ajouter une voiture</h2>
-    <form id="add-car-form">
+    <form id="add-car-form" onsubmit="submitCar(event)">
         <input type="text" id="model" name="model" placeholder="Modèle" required>
         <input type="text" id="plate" name="plate" placeholder="Plaque d'immatriculation (AA-123-AA)" pattern="[A-Z]{2}-[0-9]{3}-[A-Z]{2}" required>
         <input type="number" id="seats" name="seats" placeholder="Nombre de sièges (max 9)" min="1" max="9" required>
@@ -129,12 +125,11 @@
     </div>
     
 
-    <%- include('footer') %>
-
-    <script src="/swiper/swiper-bundle.min.js"></script>
-    <script src="/js/driverHome.js"></script>
+    <%- include('partials/footer') %>
 
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=<%= googleMapsApiKey %>&callback=initMap"></script>
+<script src="/swiper/swiper-bundle.min.js"></script>
+<script src="/js/driverHome.js"></script>
 
 </body>
 </html>

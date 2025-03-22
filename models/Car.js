@@ -1,6 +1,16 @@
 const mongoose = require('mongoose');
 
+// ✅ Fonction pour valider la plaque
+function validatePlate(plate) {
+    return /^[A-Z]{2}-\d{3}-[A-Z]{2}$/.test(plate);
+}
+
 const carSchema = new mongoose.Schema({
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     model: {
         type: String,
         required: [true, 'Le modèle de la voiture est requis.'],
@@ -9,44 +19,46 @@ const carSchema = new mongoose.Schema({
     },
     seats: {
         type: Number,
-        required: [true, 'Le nombre de sièges est requis.'],
-        min: [1, 'Il doit y avoir au moins un siège.'],
-        max: [9, 'Le nombre de sièges ne peut pas dépasser 9.']
+        required: true,
+        min: 1,
+        max: 9
     },
     plate: {
         type: String,
-        required: [true, 'La plaque d\'immatriculation est requise.'],
+        required: true,
         trim: true,
         unique: true,
         index: true
     },
     horsepower: {
         type: Number,
-        required: [true, 'La puissance du moteur est requise.'],
-        min: [1, 'La puissance doit être au moins de 1.'],
-        max: [999, 'La puissance maximale est de 999 chevaux.']
+        required: true,
+        min: 1,
+        max: 999
     },
     engine: {
         type: String,
-        required: [true, 'Le type de moteur est requis.'],
+        required: true,
         enum: ['Essence', 'Diesel', 'Électrique', 'Hybride']
     },
     image: {
         type: String,
-        required: true, // L'URL de l'image doit être obligatoire pour éviter les erreurs d'affichage
+        required: true,
         trim: true,
-        maxlength: [500, 'L\'URL de l\'image est trop longue.']
+        maxlength: 500
     }
 });
 
-// 📌 Middleware pour **formater automatiquement** la plaque AVANT de la sauvegarder
+// ✅ Middleware pour formater + valider automatiquement la plaque
 carSchema.pre('save', function(next) {
     if (this.plate) {
-        let rawPlate = this.plate.toUpperCase().replace(/[^A-Z0-9]/g, ''); // Convertit en majuscules et enlève les caractères spéciaux
+        this.plate = this.plate.toUpperCase().replace(/[^A-Z0-9]/g, '');
 
-        if (rawPlate.length === 7) {
-            this.plate = `${rawPlate.slice(0, 2)}-${rawPlate.slice(2, 5)}-${rawPlate.slice(5)}`;
-        } else {
+        if (this.plate.length === 7) {
+            this.plate = `${this.plate.slice(0, 2)}-${this.plate.slice(2, 5)}-${this.plate.slice(5)}`;
+        }
+
+        if (!validatePlate(this.plate)) {
             return next(new Error('Format de plaque invalide. Exemple : AA-123-AA'));
         }
     }
