@@ -33,7 +33,6 @@ mongoose.connect(mongoURL)
     cookie: {
       maxAge: 10 * 60 * 60 * 1000,  // ✅ Expire après 24h
       httpOnly: false,  // ✅ Empêche l'accès aux cookies par JS
-      secure: process.env.NODE_ENV === 'production'  // ✅ Active en HTTPS seulement en production
     }
   }));
   
