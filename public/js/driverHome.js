@@ -1,3 +1,4 @@
+console.log("✅ JS chargé !");
 
     var swiper = new Swiper('.swiper-container', {
         slidesPerView: "auto",  // Permet aux slides de s'adapter à la taille de l'écran
@@ -88,39 +89,44 @@
 
         function submitTrip(event) {
             event.preventDefault();
-        
-            const formData = new FormData(document.getElementById('trip-form'));
-        
-            const requestData = {
-                carId: formData.get('carId'),
-                startPoint: formData.get('start'),
-                endPoint: formData.get('end'),
-                price: formData.get('price'),
-                departureTime: formData.get('departureTime'),
-                additionalInfo: formData.get('additionalInfo')
-            };
-        
-            console.log("📤 Envoi des données de trajet:", requestData);
-        
+            console.log("🚀 submitTrip appelée");
+
+          
+            const carId = document.getElementById("selected-car-id").value;
+            const price = document.getElementById("price").value;
+            const departureTime = document.getElementById("departure-time").value;
+            const additionalInfo = document.getElementById("additional-info").value;
+          
+            const startInput = document.getElementById("start-point");
+            const endInput = document.getElementById("end-point");
+          
+            const startPlaceId = startInput.dataset.placeId;
+            const endPlaceId = endInput.dataset.placeId;
+          
             fetch('/create-trip', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestData)
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                carId,
+                price,
+                departureTime,
+                additionalInfo,
+                startPoint: startInput.value,
+                endPoint: endInput.value
+              })
             })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
-                console.log('✅ Réponse du serveur:', data);
-                if (data.error) {
-                    alert("❌ Erreur: " + data.error);
-                } else {
-                    window.location.reload();
-                }
-            })
-            .catch(error => {
-                console.error('❌ Erreur lors de la création du trajet:', error);
-                alert('Erreur serveur.');
+              if (data.error) {
+                alert("Erreur: " + data.error);
+              } else {
+                location.reload();
+              }
             });
-        }
+          }
+          
         
 
         function submitCar(event) {
@@ -244,6 +250,4 @@
                     submitCar(event);
                 });
             }
-            // Init Google Maps
-            initMap();
         });

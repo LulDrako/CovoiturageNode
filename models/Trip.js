@@ -15,9 +15,17 @@ const tripSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  startCoordinates: {
+    lat: Number,
+    lng: Number
+  },
   endPoint: {
     type: String,
     required: true
+  },
+  endCoordinates: {
+    lat: Number,
+    lng: Number
   },
   departureTime: {
     type: Date,

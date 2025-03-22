@@ -10,11 +10,12 @@ const Car = require('./models/Car');
 const Trip = require('./models/Trip');
 require('dotenv').config();
 const axios = require('axios');
+const { getCoordinates, isWithinRadius } = require('./utils/geolocation');
+
+
 
 
 const app = express();
-
-app.use(express.static(path.join(__dirname, 'public')));
 
 const mongoURL = process.env.MONGO_URL
 
@@ -41,7 +42,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', function(req, res) {
   if (req.session.userId) {
@@ -117,6 +117,7 @@ app.post('/add-car', isAuthenticated, async (req, res) => {
 
 
 app.post('/create-trip', isAuthenticated, async function(req, res) {
+  console.log("🔥 Requête reçue sur /create-trip");
   const { carId, startPoint, endPoint, price, additionalInfo, departureTime } = req.body;
 
   try {
@@ -126,7 +127,7 @@ app.post('/create-trip', isAuthenticated, async function(req, res) {
 
     const car = await Car.findById(carId);
     if (!car) {
-      return res.status(404).json({ error: 'Voiture inrouvable' });
+      return res.status(404).json({ error: 'Voiture introuvable' });
     }
 
     // Vérifier que la date de départ est valide
@@ -135,33 +136,48 @@ app.post('/create-trip', isAuthenticated, async function(req, res) {
       return res.status(400).json({ error: "L'heure de départ est invalide ou déjà passée." });
     }
 
-    // Calcul de la durée du trajet avec l’API Google Maps
-    const response = await axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${startPoint}&destination=${endPoint}&key=${process.env.GOOGLE_MAPS_API_KEY}`);
-    
-    if (!response.data || !response.data.routes || response.data.routes.length === 0) {
-      return res.status(404).json({ error: 'No routes found' });
+    // ✅ Récupérer les coordonnées GPS
+    const startCoordinates = await getCoordinates(startPoint);
+    const endCoordinates = await getCoordinates(endPoint);
+
+    if (!startCoordinates || !endCoordinates) {
+      return res.status(400).json({ error: "Impossible de récupérer les coordonnées du trajet." });
     }
 
-    const route = response.data.routes[0];
-    if (!route.legs || route.legs.length === 0) {
-      return res.status(404).json({ error: 'No legs found in the route' });
+    // ✅ Appel Google Maps Directions API pour durée et distance
+    const response = await axios.get(
+      `https://maps.googleapis.com/maps/api/directions/json`, {
+        params: {
+          origin: startPoint,
+          destination: endPoint,
+          mode: 'driving',
+          key: process.env.GOOGLE_MAPS_API_KEY
+        }
+      }
+    );
+
+    const route = response.data.routes?.[0];
+    const leg = route?.legs?.[0];
+
+    if (!leg) {
+      return res.status(404).json({ error: "Itinéraire introuvable avec Google Maps." });
     }
 
-    const duration = route.legs[0].duration.text;
-    const distance = route.legs[0].distance.text;
-    const durationSeconds = route.legs[0].duration.value; // Durée en secondes
-
-    // ✅ Calcul de l’heure d’arrivée correcte
+    const duration = leg.duration.text;
+    const distance = leg.distance.text;
+    const durationSeconds = leg.duration.value;
     const arrivalDate = new Date(departureDate.getTime() + durationSeconds * 1000);
 
-    // ✅ Création et sauvegarde du trajet
+    // ✅ Création du trajet avec coordonnées incluses
     const trip = new Trip({
       driver: req.user._id,
-      car: car._id, 
+      car: car._id,
       startPoint,
       endPoint,
+      startCoordinates,
+      endCoordinates,
       departureTime: departureDate,
-      arrivalTime: arrivalDate, // Ajout de l’heure d’arrivée
+      arrivalTime: arrivalDate,
       seatsAvailable: car.seats,
       price,
       additionalInfo,
@@ -173,8 +189,8 @@ app.post('/create-trip', isAuthenticated, async function(req, res) {
     res.json({ message: 'Trajet créé avec succès !', trip });
 
   } catch (error) {
-    console.error('Error creating trip:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Erreur lors de la création du trajet :', error);
+    res.status(500).json({ error: 'Erreur interne du serveur' });
   }
 });
 
@@ -226,7 +242,8 @@ app.get('/passengerHome', isAuthenticated, async function(req, res) {
         title: 'Espace Passager',
         user: req.user,
         trips: trips,
-        pageCss: 'passenger'
+        pageCss: 'passenger',
+        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
       });
     } catch (error) {
       console.error('Erreur lors de la récupération des trajets:', error);
@@ -241,21 +258,37 @@ app.post('/search-trips', isAuthenticated, async (req, res) => {
   const { start, end, date } = req.body;
 
   try {
+    const startCoords = await getCoordinates(start);
+    const endCoords = await getCoordinates(end);
+
+    if (!startCoords || !endCoords) {
+      return res.status(400).send("Ville non reconnue.");
+    }
+
     const dayStart = new Date(date);
     const dayEnd = new Date(date);
     dayEnd.setHours(23, 59, 59, 999);
 
-    const trips = await Trip.find({
-      startPoint: { $regex: new RegExp(start, 'i') },
-      endPoint: { $regex: new RegExp(end, 'i') },
+    let allTrips = await Trip.find({
       departureTime: { $gte: dayStart, $lte: dayEnd }
     }).populate('car').populate('driver');
+
+    // Filtrage par rayon de 50km
+    allTrips = allTrips.filter(trip => {
+      const tripStart = trip.startCoordinates;
+      const tripEnd = trip.endCoordinates;
+    
+      if (!tripStart || !tripEnd) return false; // ⛔ ignorer les trajets sans coordonnées
+    
+      return isWithinRadius(startCoords, tripStart) && isWithinRadius(endCoords, tripEnd);
+    });
 
     res.render('searchResults', {
       title: 'Résultats de recherche',
       user: req.user,
-      trips
+      trips: allTrips
     });
+
   } catch (error) {
     console.error("Erreur recherche trajets:", error);
     res.status(500).send("Erreur interne");
@@ -363,5 +396,7 @@ async function isAuthenticated(req, res, next) {
         res.redirect('/login');
     }
 }
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 module.exports = app;

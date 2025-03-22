@@ -1,6 +1,13 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <%- include('partials/head') %>
+<body>
 <%- include('partials/header', { user: user }) %>
 
-<h1 style="text-align:center;">🛣️ Résultats de votre recherche</h1>
+<h1 style="text-align:center;">
+  <i class="fas fa-search-location" style="color:#919191; margin-right: 10px;"></i>
+  Résultats de votre recherche
+</h1>
 
 <% if (trips.length === 0) { %>
   <p style="text-align:center; margin-top: 30px;">Aucun trajet trouvé pour cette date et cet itinéraire.</p>
@@ -8,20 +15,27 @@
   <div class="trip-results">
     <% trips.forEach(function(trip) { %>
       <div class="trip-card">
-        <h3>🚗 De <%= trip.startPoint %> à <%= trip.endPoint %></h3>
-        <p><strong>Conducteur:</strong> <%= trip.driver?.username || 'Inconnu' %></p>
+        <h3><i class="fas fa-location-dot"></i> <strong>Départ :</strong> <%= trip.startPoint %></h3>
+        <h3><i class="fas fa-flag-checkered"></i> <strong>Arrivée :</strong> <%= trip.endPoint %></h3>
+
+        <p><i class="fas fa-user"></i> <strong>Conducteur(ice) :</strong> <%= trip.driver?.username || 'Inconnu' %></p>
+
         <% if (trip.car?.image) { %>
           <img src="<%= trip.car.image %>" alt="voiture" />
         <% } %>
-        <p><strong>Voiture:</strong> <%= trip.car?.model || '-' %> (<%= trip.car?.plate || '-' %>)</p>
-        <p><strong>Départ:</strong> <%= new Date(trip.departureTime).toLocaleString('fr-FR') %></p>
-        <p><strong>Arrivée estimée:</strong> 
+
+        <p><i class="fas fa-car"></i> <strong>Voiture :</strong> <%= trip.car?.model || '-' %> (<%= trip.car?.plate || '-' %>)</p>
+        <p><i class="fas fa-clock"></i> <strong>Départ :</strong> <%= new Date(trip.departureTime).toLocaleString('fr-FR') %></p>
+        <p><i class="fas fa-hourglass-half"></i> <strong>Arrivée estimée :</strong> 
           <%= trip.arrivalTime ? new Date(trip.arrivalTime).toLocaleString('fr-FR') : 'Non disponible' %>
         </p>
-        <p><strong>Durée:</strong> <%= trip.duration %></p>
-        <p><strong>Distance:</strong> <%= trip.distance %></p>
-        <p><strong>Sièges:</strong> <%= trip.seatsAvailable %></p>
-        <p><strong>Prix:</strong> <%= trip.price %>€</p>
+        <p><i class="fas fa-stopwatch"></i> <strong>Durée:</strong>
+          <%= trip.duration.replace("hours", "heures").replace("mins", "minutes") %>
+      </p>
+        <p><i class="fas fa-road"></i> <strong>Distance :</strong> <%= trip.distance %></p>
+        <p><i class="fas fa-users"></i> <strong>Sièges :</strong> <%= trip.seatsAvailable %></p>
+        <p><i class="fas fa-euro-sign"></i> <strong>Prix :</strong> <%= trip.price %>€</p>
+
         <form action="/reserve-trip" method="POST">
           <input type="hidden" name="tripId" value="<%= trip._id %>">
           <button type="submit">Réserver</button>
@@ -32,42 +46,74 @@
 <% } %>
 
 <%- include('partials/footer') %>
+</body>
+</html>
 
 <style>
-.trip-results {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 20px;
-  padding: 40px;
-}
-
-.trip-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  text-align: left;
-}
-
-.trip-card img {
-  width: 100%;
-  max-height: 180px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin: 10px 0;
-}
-
-.trip-card form {
-  margin-top: 10px;
-}
-
-.trip-card button {
-  background-color: #4CAF50;
-  border: none;
-  color: white;
-  padding: 10px 15px;
-  font-size: 16px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-</style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f7f7f7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .trip-results {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+    padding: 40px 60px;
+  }
+  
+  .trip-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .trip-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+  
+  .trip-card img {
+    width: 100%;
+    height: auto;
+    max-height: 280px;
+    object-fit: contain;
+    border-radius: 10px;
+    margin: 15px 0;
+  }
+  
+  .trip-card p, .trip-card h3 {
+    margin: 8px 0;
+    color: #333;
+  }
+  
+  .trip-card i {
+    color: #919191;
+    margin-right: 8px;
+  }
+  
+  .trip-card button {
+    width: 100%;
+    background-color: #919191;
+    border: none;
+    color: white;
+    padding: 14px 0;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background 0.3s ease;
+  }
+  
+  .trip-card button:hover {
+    background-color: #000000;
+  }
+  </style>
+  
