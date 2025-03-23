@@ -165,8 +165,6 @@ app.post('/create-trip', isAuthenticatedJWT, async function(req, res) {
       return res.status(400).json({ error: "L'heure de départ est invalide ou déjà passée." });
     }
 
-    
-
     // ✅ Récupérer les coordonnées GPS
     const startCoordinates = await getCoordinates(startPoint);
     const endCoordinates = await getCoordinates(endPoint);
@@ -186,6 +184,12 @@ app.post('/create-trip', isAuthenticatedJWT, async function(req, res) {
         }
       }
     );
+    
+    console.log("📦 Directions API Response:", response.data); // ← ajoute ça
+    
+
+console.log("📦 Directions API Response:", response.data); // ← ajoute ça
+
 
     const route = response.data.routes?.[0];
     const leg = route?.legs?.[0];
