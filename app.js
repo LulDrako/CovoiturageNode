@@ -145,6 +145,8 @@ app.post('/add-car', isAuthenticatedJWT, async (req, res) => {
 app.post('/create-trip', isAuthenticatedJWT, async function(req, res) {
   console.log("🔥 Requête reçue sur /create-trip");
   const { carId, startPoint, endPoint, price, additionalInfo, departureTime } = req.body;
+  console.log("[/create-trip] Données reçues :", req.body);
+
 
   try {
     if (!carId) {
