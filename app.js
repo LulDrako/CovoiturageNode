@@ -144,9 +144,12 @@ app.post('/add-car', isAuthenticatedJWT, async (req, res) => {
 
 app.post('/create-trip', isAuthenticatedJWT, async function(req, res) {
   console.log("🔥 Requête reçue sur /create-trip");
+  console.log("🔥 Requête reçue sur /create-trip");
+  console.log("[Prod DEBUG] Headers:", req.headers);
+  console.log("[Prod DEBUG] Body brut:", req.body);
   const { carId, startPoint, endPoint, price, additionalInfo, departureTime } = req.body;
-  console.log("[/create-trip] Données reçues :", req.body);
-
+  console.log("[Prod DEBUG] Headers:", req.headers);
+  console.log("[Prod DEBUG] Body brut:", req.body);
 
   try {
     if (!carId) {
