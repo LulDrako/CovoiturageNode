@@ -256,7 +256,6 @@ app.get('/driverHome', isAuthenticatedJWT, async function(req, res) {
               cars: cars,
               trips: trips,
               googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
-              googleMapsFrontKey: process.env.GOOGLE_MAPS_FRONT_KEY,
               pageCss: 'driver'
 
           });
