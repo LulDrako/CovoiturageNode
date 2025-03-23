@@ -1,8 +1,8 @@
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
-    background: linear-gradient(135deg, #f0f4f8, #dbe9f4);
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(145deg, #e0f7fa, #c8e6c9);
     background-attachment: fixed;
     color: #333;
 }
