@@ -60,7 +60,42 @@ body {
     transition: background-color 0.3s;
   }
   
-    button:hover {
+    .password-wrapper {
+        position: relative;
+        margin-bottom: 15px;
+      }
+      
+      .password-wrapper input {
+        width: 100%;
+        padding: 12px 45px 12px 12px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 15px;
+        box-sizing: border-box;
+        background-color: #e9f2fc;
+      }
+      
+      .password-wrapper i {
+        position: absolute;
+        top: 60%;
+        right: 14px;
+        transform: translateY(-50%);
+        width: 24px;
+        height: 24px;
+        font-size: 18px;
+        color: #666;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .password-wrapper i:hover {
+        color: #333;
+      }
+
+      button:hover {
         background-color: #4CAF50;
     }
+      
   

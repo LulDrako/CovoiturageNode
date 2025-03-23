@@ -24,13 +24,19 @@ body {
     width: 100%;
     max-width: 400px;
   }
+
+  label {
+    display: block;
+    margin-top: 15px;         /* Ajoute de l’espace au-dessus du label */
+    margin-bottom: 5px;       /* Un petit espace sous le label */
+    color: #333;
+    font-weight: 500;
+  }
   
   input[type="email"],
   input[type="password"] {
     width: 100%;
     padding: 12px;
-    margin-top: 10px;
-    margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-sizing: border-box;
@@ -66,53 +72,42 @@ body {
 
   .subtitle {
     margin-top: -10px;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     color: #e8f5e9;
     font-size: 16px;
     font-weight: 400;
     text-align: center;
   }
-
+  
   .password-wrapper {
     position: relative;
-    width: 100%;
+    margin-bottom: 15px;
   }
   
   .password-wrapper input {
     width: 100%;
-    padding: 12px;
-    padding-right: 40px; /* espace pour l’icône */
-    margin-top: 10px;
+    padding: 12px 45px 12px 12px; /* ✅ espace à droite pour l’icône */
     border: 1px solid #ccc;
     border-radius: 5px;
-    box-sizing: border-box;
     font-size: 15px;
-    background-color: #f0f6ff;
-    transition: border-color 0.3s, background-color 0.3s;
-  }
-  
-  .password-wrapper input:focus {
-    border-color: #00b09b;
-    outline: none;
+    box-sizing: border-box;
+    background-color: #e9f2fc;
   }
   
   .password-wrapper i {
     position: absolute;
-    top: 50%;
-    right: 12px;
+    top: 60%;
+    right: 14px;
     transform: translateY(-50%);
-    color: #777;
-    cursor: pointer;
+    width: 24px;
+    height: 24px;
     font-size: 18px;
-    transition: color 0.3s, transform 0.2s ease;
+    color: #666;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  
-  .password-wrapper i:hover {
-    color: #333;
-    transform: translateY(-50%) scale(1.1);
-  }
-  
-  
   
   button:hover {
     background-color: #009688;

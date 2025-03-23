@@ -1,64 +1,76 @@
 <!DOCTYPE html>
 <html lang="fr">
-    <%- include('partials/head') %>
-<body>
+  <%- include('partials/head') %>
+  <body>
     <h1>Inscription</h1>
     <form id="signup-form">
-        <label for="username">Nom d'utilisateur :</label>
-        <input type="text" id="username" name="username" required placeholder="Nom d'utilisateur">
-        
-        <label for="email">Email :</label>
-        <input type="email" id="email" name="email" required placeholder="Email">
-        
-        <label for="password">Mot de passe :</label>
-        <input type="password" id="password" name="password" required placeholder="Mot de passe" autocomplete="current-password">
-        
-        <label for="role">Rôle :</label>
-        <select id="role" name="role" required>
-            <option value="driver">Conducteur</option>
-            <option value="passenger">Passager</option>
-        </select>
-        
-        <button type="submit">S'inscrire</button>
+      <label for="username">Nom d'utilisateur :</label>
+      <input type="text" id="username" name="username" required placeholder="Nom d'utilisateur" />
+
+      <label for="email">Email :</label>
+      <input type="email" id="email" name="email" required placeholder="Email" />
+
+      <label for="password">Mot de passe :</label>
+      <div class="password-wrapper">
+        <input type="password" id="password" name="password" required placeholder="Mot de passe" />
+        <i id="togglePassword" class="fa-regular fa-eye-slash"></i>
+      </div>
+
+      <label for="role">Rôle :</label>
+      <select id="role" name="role" required>
+        <option value="driver">Conducteur</option>
+        <option value="passenger">Passager</option>
+      </select>
+
+      <button type="submit">S'inscrire</button>
     </form>
 
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const signupForm = document.getElementById('signup-form');
+      // Gère l’affichage/masquage du mot de passe
+      const toggle = document.getElementById("togglePassword");
+      const passwordInput = document.getElementById("password");
 
-        signupForm.addEventListener('submit', async function (e) {
-            e.preventDefault();
+      toggle.addEventListener("click", () => {
+        const isVisible = passwordInput.type === "text";
+        passwordInput.type = isVisible ? "password" : "text";
+        toggle.classList.remove("fa-eye", "fa-eye-slash");
+        toggle.classList.add(isVisible ? "fa-eye-slash" : "fa-eye");
+      });
 
-            const data = {
-                username: document.getElementById('username').value,
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
-                role: document.getElementById('role').value
-            };
+      // Soumission du formulaire
+      document.addEventListener("DOMContentLoaded", () => {
+        const signupForm = document.getElementById("signup-form");
 
-            try {
-                const res = await fetch('/users/signup', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
+        signupForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
 
-                const result = await res.json();
+          const data = {
+            username: document.getElementById("username").value,
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value,
+            role: document.getElementById("role").value,
+          };
 
-                if (res.ok && result.redirect) {
-                    window.location.href = result.redirect;
-                } else {
-                    alert(result.error || result.message || "Une erreur inconnue.");
-                }
+          try {
+            const res = await fetch("/users/signup", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data),
+            });
 
-            } catch (err) {
-                console.error("Erreur lors de l'inscription :", err);
-                alert("Erreur de connexion au serveur. Vérifie ta connexion ou réessaie plus tard.");
+            const result = await res.json();
+
+            if (res.ok && result.redirect) {
+              window.location.href = result.redirect;
+            } else {
+              alert(result.error || result.message || "Une erreur inconnue.");
             }
+          } catch (err) {
+            console.error("Erreur lors de l'inscription :", err);
+            alert("Erreur de connexion au serveur.");
+          }
         });
-    });
+      });
     </script>
-</body>
+  </body>
 </html>
