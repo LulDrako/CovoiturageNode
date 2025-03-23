@@ -1,24 +1,20 @@
-.video-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 30px;
-  }
-  
-  .video-container video {
-    max-width: 90%;
-    height: auto;
-    border-radius: 12px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  }
-  
-
-h1 {
-    text-align: center;
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #f0f4f8, #dbe9f4);
+    background-attachment: fixed;
+    color: #333;
 }
 
-p {
-    text-align: center;
-    margin-bottom: 20px;
+header {
+    padding: 30px 0 10px;
+}
+
+.logo {
+    display: block;
+    max-width: 140px;
+    margin: 0 auto 20px;
 }
 
 nav {
@@ -27,7 +23,7 @@ nav {
 }
 
 nav ul {
-    list-style-type: none;
+    list-style: none;
     padding: 0;
     margin: 0;
 }
@@ -38,22 +34,47 @@ nav ul li {
 
 nav ul li a {
     text-decoration: none;
-    color: #333;
+    color: #2d2d2d;
     font-weight: bold;
-    font-size: 18px; 
-    padding: 10px;
+    font-size: 18px;
+    padding: 10px 15px;
+    transition: color 0.2s;
 }
 
-nav ul li:not(:last-child) a:after {
+nav ul li a:hover {
+    color: #198754;
+}
+
+nav ul li:not(:last-child)::after {
     content: "|";
+    color: #ccc;
     padding-left: 10px;
-    padding-right: 20px;
-    margin-left: 55px;
 }
 
-.logo {
-    display: block;
-    max-width: 200px;
-    margin: 0 auto;
-    margin-bottom: 40px;
+h1 {
+    text-align: center;
+    font-size: 32px;
+    margin-top: 10px;
+}
+
+p {
+    text-align: center;
+    font-size: 18px;
+    margin-top: 5px;
+    color: #555;
+}
+
+.video-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 40px auto;
+    max-width: 1000px;
+    padding: 0 20px;
+}
+
+.video-container video {
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }

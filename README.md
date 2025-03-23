@@ -40,19 +40,6 @@ Le projet repose sur :
 - **CSS/HTML** : Interface utilisateur
 - **Swiper.js** : Slider de voitures
 
-## Screenshots
-
-Voici un aperçu de l'interface :
-
-![Accueil](/images/image-6.png)
-![Connexion](/images/image.png)
-![Inscription](/images/image-1.png)
-![Page conducteur](/images/image-2.png)
-![Création de trajet](/images/image-4.png)
-![Liste des trajets](/images/image-5.png)
-![Page passager](/images/image-7.png)
-![Vue détaillée](/images/image-3.png)
-
 ## Installation
 
 1. Clonez ce dépôt :
