@@ -108,6 +108,7 @@ console.log("✅ JS chargé !");
               headers: {
                 'Content-Type': 'application/json'
               },
+              credentials: 'include',
               body: JSON.stringify({
                 carId,
                 price,
@@ -136,6 +137,7 @@ console.log("✅ JS chargé !");
             fetch('/add-car', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({
                     model: formData.get('model'),
                     seats: formData.get('seats'),
