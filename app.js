@@ -1,16 +1,17 @@
 const express = require('express');
-const session = require('express-session');
 const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
-const favicon = require('serve-favicon');
 const User = require('./models/User');
 const Car = require('./models/Car');
 const Trip = require('./models/Trip');
 require('dotenv').config();
 const axios = require('axios');
 const { getCoordinates, isWithinRadius } = require('./utils/geolocation');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+const isAuthenticatedJWT = require('./middlewares/isAuthenticatedJWT');
 
 
 
@@ -26,66 +27,90 @@ mongoose.connect(mongoURL)
     process.exit(1);
   });
 
-  app.use(session({
-    secret: 'une_chaine_secrete_complexe',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      maxAge: 10 * 60 * 60 * 1000,  // ✅ Expire après 24h
-      httpOnly: false,  // ✅ Empêche l'accès aux cookies par JS
-    }
-  }));
-  
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cookieParser());
+
 
 app.get('/', function(req, res) {
-  if (req.session.userId) {
-    const redirectPath = req.session.role === 'driver' ? '/driverHome' : '/passengerHome';
-    res.redirect(redirectPath);
-  } else {
-    res.render('home', { title: 'Bienvenue sur KovoitGo', pageCss: 'home' });
+  const token = req.cookies.token;
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const redirectPath = decoded.role === 'driver' ? '/driverHome' : '/passengerHome';
+      return res.redirect(redirectPath);
+    } catch (err) {
+      console.error('Token invalide :', err);
+      res.clearCookie('token');
+    }
   }
+
+  res.render('home', { title: 'Bienvenue sur KovoitGo', pageCss: 'home' });
 });
 
+
 app.get('/users/signup', function(req, res) {
+  const token = req.cookies.token;
+  
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const redirectPath = decoded.role === 'driver' ? '/driverHome' : '/passengerHome';
+      return res.redirect(redirectPath); // 🔁 Redirection si déjà connecté
+    } catch (err) {
+      console.error('Token invalide :', err);
+      res.clearCookie('token'); // 🔒 Token cassé = on le supprime
+    }
+  }
+
   res.render('signup', { title: 'Inscription - KovoitGo', pageCss: 'signup' });
 });
 
+
 app.get('/users/login', function(req, res) {
+  const token = req.cookies.token;
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const redirectPath = decoded.role === 'driver' ? '/driverHome' : '/passengerHome';
+      return res.redirect(redirectPath);  // ✅ Redirige s’il est déjà connecté
+    } catch (err) {
+      console.error('Token invalide :', err);
+      res.clearCookie('token'); // ❌ On supprime le token s’il est corrompu
+    }
+  }
+
   res.render('login', { title: 'Connexion - KovoitGo', pageCss: 'login' });
 });
+
 
 app.get('/reglement', function(req, res) {
   res.render('reglement', { title: 'Réglement - KovoitGo', pageCss: 'reglement' });
 });
 
-app.post('/reserve-trip', isAuthenticated, async (req, res) => {
+app.post('/reserve-trip', isAuthenticatedJWT, async (req, res) => {
   const { tripId } = req.body;
 
   res.status(200).send(); 
 });
 
-app.get('/payment', isAuthenticated, async (req, res) => {
+app.get('/payment', isAuthenticatedJWT, async (req, res) => {
   const { tripId } = req.query; 
   res.render('payment', { tripId });
 });
 
 
 app.get('/logout', function(req, res) {
-  req.session.destroy(function(err) {
-    if (err) {
-      console.log(err);
-    } else {
-      res.redirect('/');
-    }
-  });
+  res.clearCookie('token');
+  res.redirect('/');
 });
 
-app.post('/add-car', isAuthenticated, async (req, res) => {
+
+app.post('/add-car', isAuthenticatedJWT, async (req, res) => {
   try {
       const { model, seats, plate, horsepower, engine, image } = req.body;
 
@@ -115,7 +140,7 @@ app.post('/add-car', isAuthenticated, async (req, res) => {
 
 
 
-app.post('/create-trip', isAuthenticated, async function(req, res) {
+app.post('/create-trip', isAuthenticatedJWT, async function(req, res) {
   console.log("🔥 Requête reçue sur /create-trip");
   const { carId, startPoint, endPoint, price, additionalInfo, departureTime } = req.body;
 
@@ -194,7 +219,7 @@ app.post('/create-trip', isAuthenticated, async function(req, res) {
 });
 
 
-app.post('/trips/:id/delete', isAuthenticated, async (req, res) => {
+app.post('/trips/:id/delete', isAuthenticatedJWT, async (req, res) => {
   try {
       const result = await Trip.findByIdAndDelete(req.params.id);
       if (!result) {
@@ -208,7 +233,7 @@ app.post('/trips/:id/delete', isAuthenticated, async (req, res) => {
 });
 
 
-app.get('/driverHome', isAuthenticated, async function(req, res) {
+app.get('/driverHome', isAuthenticatedJWT, async function(req, res) {
   if (req.user.role === 'driver') {
       try {
           const cars = await Car.find({ owner: req.user._id }); // ✅ Seules ses voitures
@@ -233,7 +258,7 @@ app.get('/driverHome', isAuthenticated, async function(req, res) {
 });
 
 
-app.get('/passengerHome', isAuthenticated, async function(req, res) {
+app.get('/passengerHome', isAuthenticatedJWT, async function(req, res) {
   if(req.user.role === 'passenger') {
     try {
       const trips = await Trip.find().populate('car').populate('driver');
@@ -253,7 +278,7 @@ app.get('/passengerHome', isAuthenticated, async function(req, res) {
   }
 });
 
-app.post('/search-trips', isAuthenticated, async (req, res) => {
+app.post('/search-trips', isAuthenticatedJWT, async (req, res) => {
   const { start, end, date } = req.body;
 
   try {
@@ -300,71 +325,65 @@ app.post("/users/signup", async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
     console.log("Inscription reçue pour :", username, "avec le rôle", role);
- 
+
     const existingUser = await User.findOne({
-      $or: [{ username: username }, { email: email }],
+      $or: [{ username }, { email }],
     });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ error: "Le nom d'utilisateur ou l'email est déjà pris." });
+      return res.status(400).json({ error: "Nom d'utilisateur ou email déjà pris." });
     }
- 
+
     const hashedPassword = await bcrypt.hash(password, 12);
-    const user = await new User({
-      username,
-      email,
-      hashedPassword,
-      role,
-    }).save();
- 
-    req.session.userId = user._id;
-    req.session.role = user.role;
- 
-    const redirectPath =
-      user.role === "driver" ? "/driverHome" : "/passengerHome";
- 
-    res.json({ message: "Inscription réussie", redirect: redirectPath });
+
+    await new User({ username, email, hashedPassword, role }).save();
+
+    // ✅ Après inscription, rediriger vers /users/login
+    return res.json({ message: "Inscription réussie", redirect: "/users/login" });
+
   } catch (error) {
     console.error("Erreur d'inscription:", error);
-    res
-      .status(500)
-      .json({ error: "Erreur lors de l'inscription. Veuillez réessayer." });
+    return res.status(500).json({ error: "Erreur lors de l'inscription. Veuillez réessayer." });
   }
 });
 
 
 app.post("/users/login", async (req, res) => {
   const { email, password } = req.body;
-  console.log("Tentative de connexion avec email:", email);
 
   try {
     const user = await User.findOne({ email }).exec();
-    if (!user) {
-      console.log("Aucun utilisateur trouvé avec cet email:", email);
-      return res.status(401).send("Email ou mot de passe incorrect.");
-    }
+    if (!user) return res.status(401).send("Email ou mot de passe incorrect.");
 
     const isMatch = await bcrypt.compare(password, user.hashedPassword);
-    if (isMatch) {
-      req.session.userId = user._id;
-      req.session.role = user.role;
-      console.log("Connexion réussie pour:", user.username);
-      res.redirect(user.role === "driver" ? "/driverHome" : "/passengerHome");
-    } else {
-      console.log("Mot de passe incorrect pour:", email);
-      res.status(401).send("Email ou mot de passe incorrect.");
-    }
+    if (!isMatch) return res.status(401).send("Email ou mot de passe incorrect.");
+
+    // ✅ Création du JWT
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' } // 24h
+    );
+
+    // ✅ Cookie sécurisé
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000 // 1 jour
+    });
+
+    res.redirect(user.role === "driver" ? "/driverHome" : "/passengerHome");
+
   } catch (error) {
-    console.error("Erreur lors de la connexion:", error);
+    console.error("Erreur login:", error);
     res.status(500).send("Erreur interne du serveur.");
   }
 });
 
 
 
+
 // app.js
-app.post('/process-payment', isAuthenticated, async (req, res) => {
+app.post('/process-payment', isAuthenticatedJWT, async (req, res) => {
   // ... your payment processing logic ...
 
   if (paymentSuccessful) {
@@ -374,27 +393,6 @@ app.post('/process-payment', isAuthenticated, async (req, res) => {
   }
 });
 
-
-
-async function isAuthenticated(req, res, next) {
-    if (req.session.userId) {
-        try {
-            const userFromDb = await User.findById(req.session.userId);
-            console.log('Utilisateur trouvé:', userFromDb);
-            if (!userFromDb) {
-                req.session.destroy(() => res.redirect('/login'));
-                return;
-            }
-            req.user = userFromDb;
-            next();
-        } catch (error) {
-            console.error('Erreur lors de la récupération de l\'utilisateur:', error);
-            res.status(500).send("Erreur interne du serveur.");
-        }
-    } else {
-        res.redirect('/login');
-    }
-}
 
 app.use(express.static(path.join(__dirname, 'public')));
 
