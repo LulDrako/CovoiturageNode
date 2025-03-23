@@ -1,9 +1,5 @@
 const mongoose = require('mongoose');
-
-// ✅ Fonction pour valider la plaque
-function validatePlate(plate) {
-    return /^[A-Z]{2}-\d{3}-[A-Z]{2}$/.test(plate);
-}
+const { validatePlate, formatPlate } = require('../utils/validators');
 
 const carSchema = new mongoose.Schema({
     owner: {
@@ -49,15 +45,10 @@ const carSchema = new mongoose.Schema({
     }
 });
 
-// ✅ Middleware pour formater + valider automatiquement la plaque
+// ✅ Middleware pour formater et valider la plaque
 carSchema.pre('save', function(next) {
     if (this.plate) {
-        this.plate = this.plate.toUpperCase().replace(/[^A-Z0-9]/g, '');
-
-        if (this.plate.length === 7) {
-            this.plate = `${this.plate.slice(0, 2)}-${this.plate.slice(2, 5)}-${this.plate.slice(5)}`;
-        }
-
+        this.plate = formatPlate(this.plate);
         if (!validatePlate(this.plate)) {
             return next(new Error('Format de plaque invalide. Exemple : AA-123-AA'));
         }
