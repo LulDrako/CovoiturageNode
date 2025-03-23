@@ -167,6 +167,8 @@ app.post('/create-trip', isAuthenticatedJWT, async function(req, res) {
     // ✅ Récupérer les coordonnées GPS
     const startCoordinates = await getCoordinates(startPoint);
     const endCoordinates = await getCoordinates(endPoint);
+    console.log("📍 Coordonnées départ :", startCoordinates);
+console.log("📍 Coordonnées arrivée :", endCoordinates);
 
     if (!startCoordinates || !endCoordinates) {
       return res.status(400).json({ error: "Impossible de récupérer les coordonnées du trajet." });
