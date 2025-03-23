@@ -11,7 +11,18 @@ function formatPlate(rawPlate) {
     return clean;
 }
 
+function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+function validatePassword(password) {
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
+}
+
 module.exports = {
     validatePlate,
-    formatPlate
+    formatPlate,
+    validateEmail,
+    validatePassword
 };

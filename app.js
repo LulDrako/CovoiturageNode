@@ -12,6 +12,8 @@ const { getCoordinates, isWithinRadius } = require('./utils/geolocation');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const isAuthenticatedJWT = require('./middlewares/isAuthenticatedJWT');
+const { validateEmail, validatePassword } = require('./utils/validators');
+
 
 
 
@@ -297,7 +299,7 @@ app.post('/search-trips', isAuthenticatedJWT, async (req, res) => {
       departureTime: { $gte: dayStart, $lte: dayEnd }
     }).populate('car').populate('driver');
 
-    // Filtrage par rayon de 50km
+    // Filtrage par rayon de 30km
     allTrips = allTrips.filter(trip => {
       const tripStart = trip.startCoordinates;
       const tripEnd = trip.endCoordinates;
@@ -320,29 +322,53 @@ app.post('/search-trips', isAuthenticatedJWT, async (req, res) => {
 });
 
 
-
 app.post("/users/signup", async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
-    console.log("Inscription reçue pour :", username, "avec le rôle", role);
+    console.log(`[SIGNUP] Demande pour ${username} (${email}) en tant que ${role}`);
+
+    // ✅ Validation du format email
+    if (!validateEmail(email)) {
+      return res.status(400).json({ error: "Format d'email invalide." });
+    }
+
+    if (!validatePassword(password)) {
+      return res.status(400).json({
+        error: "Mot de passe faible. Il doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre."
+      });
+    }
 
     const existingUser = await User.findOne({
       $or: [{ username }, { email }],
     });
+
     if (existingUser) {
-      return res.status(400).json({ error: "Nom d'utilisateur ou email déjà pris." });
+      return res
+        .status(400)
+        .json({ error: "Le nom d'utilisateur ou l'email est déjà pris." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
+    const user = await new User({ username, email, hashedPassword, role }).save();
 
-    await new User({ username, email, hashedPassword, role }).save();
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
 
-    // ✅ Après inscription, rediriger vers /users/login
-    return res.json({ message: "Inscription réussie", redirect: "/users/login" });
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000
+    });
+
+    const redirectPath = role === 'driver' ? '/driverHome' : '/passengerHome';
+    res.json({ message: "Inscription réussie", redirect: redirectPath });
 
   } catch (error) {
     console.error("Erreur d'inscription:", error);
-    return res.status(500).json({ error: "Erreur lors de l'inscription. Veuillez réessayer." });
+    res.status(500).json({ error: "Erreur lors de l'inscription. Veuillez réessayer." });
   }
 });
 
