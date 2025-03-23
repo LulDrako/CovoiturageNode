@@ -148,8 +148,6 @@ app.post('/create-trip', isAuthenticatedJWT, async function(req, res) {
   console.log("[Prod DEBUG] Headers:", req.headers);
   console.log("[Prod DEBUG] Body brut:", req.body);
   const { carId, startPoint, endPoint, price, additionalInfo, departureTime } = req.body;
-  console.log("[Prod DEBUG] Headers:", req.headers);
-  console.log("[Prod DEBUG] Body brut:", req.body);
 
   try {
     if (!carId) {
@@ -222,9 +220,10 @@ app.post('/create-trip', isAuthenticatedJWT, async function(req, res) {
     res.json({ message: 'Trajet créé avec succès !', trip });
 
   } catch (error) {
-    console.error('Erreur lors de la création du trajet :', error);
+    console.error('Erreur lors de la création du trajet :', error.response?.data || error.message);
     res.status(500).json({ error: 'Erreur interne du serveur' });
   }
+  
 });
 
 
