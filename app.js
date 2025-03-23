@@ -203,7 +203,6 @@ console.log("📦 Directions API Response:", response.data); // ← ajoute ça
     const durationSeconds = leg.duration.value;
     const arrivalDate = new Date(departureDate.getTime() + durationSeconds * 1000);
 
-    // ✅ Création du trajet avec coordonnées incluses
     const trip = new Trip({
       driver: req.user._id,
       car: car._id,
@@ -257,6 +256,7 @@ app.get('/driverHome', isAuthenticatedJWT, async function(req, res) {
               cars: cars,
               trips: trips,
               googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+              googleMapsFrontKey: process.env.GOOGLE_MAPS_FRONT_KEY,
               pageCss: 'driver'
 
           });
