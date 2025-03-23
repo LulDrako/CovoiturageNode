@@ -1,12 +1,44 @@
 <!DOCTYPE html>
 <html lang="fr">
-    <%- include('partials/head') %>
-<body>
+  <%- include('partials/head') %>
+  <body>
     <h1>Connexion</h1>
+    <p class="subtitle">Connecte-toi à ton espace personnel</p>
+
     <form action="/users/login" method="post">
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Mot de passe" required>
-        <button type="submit">Se connecter</button>
+      <label for="email">Adresse email :</label>
+      <input type="email" id="email" name="email" placeholder="Entrez votre email" required>
+
+      <label for="password">Mot de passe :</label>
+      <div class="password-wrapper">
+        <input type="password" id="password" name="password" placeholder="Entrez votre mot de passe" required>
+        <i class="fa-regular fa-eye" id="togglePassword" aria-hidden="true"></i>
+      </div>
+      
+      
+
+      <button type="submit">Se connecter</button>
+
+      <p style="text-align: center; margin-top: 15px;">
+        Pas encore inscrit ? <a href="/users/signup">Créer un compte</a>
+      </p>
     </form>
-</body>
+
+    <script>
+        const toggle = document.getElementById("togglePassword");
+        const passwordInput = document.getElementById("password");
+      
+        toggle.addEventListener("click", function () {
+          const isPasswordVisible = passwordInput.type === "text";
+      
+          // Toggle input type
+          passwordInput.type = isPasswordVisible ? "password" : "text";
+      
+          // Toggle icon
+          this.classList.remove("fa-eye", "fa-eye-slash");
+          this.classList.add(isPasswordVisible ? "fa-eye-slash" : "fa-eye");
+        });
+      </script>
+      
+  </body>
 </html>

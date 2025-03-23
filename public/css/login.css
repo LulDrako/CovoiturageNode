@@ -1,42 +1,120 @@
+
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f2f2f2;
-    padding: 20px;
-}
-
-h1 {
-    text-align: center;
-}
-
-form {
-    max-width: 400px;
-    margin: 0 auto;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-input[type="email"],
-input[type="password"] {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to right, #00b09b, #96c93d);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  
+  h1 {
+    margin-bottom: 20px;
+    color: white;
+  }
+  
+  form {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     width: 100%;
-    padding: 10px;
+    max-width: 400px;
+  }
+  
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-}
-
-button[type="submit"] {
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+    font-size: 15px;
+  }
+  
+  input[type="email"]::placeholder,
+  input[type="password"]::placeholder {
+    color: #aaa;
+    font-style: italic;
+  }
+  
+  input[type="email"]:focus,
+  input[type="password"]:focus {
+    border-color: #00b09b;
+    outline: none;
+  }
+  
+  button {
+    margin-top: 25px;
     width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: #fff;
+    padding: 14px;
+    background-color: #00b09b;
+    color: white;
     border: none;
     border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-}
+    transition: background-color 0.3s;
+  }
 
-button[type="submit"]:hover {
-    background-color: #0056b3;
-}
+  .subtitle {
+    margin-top: -10px;
+    margin-bottom: 25px;
+    color: #e8f5e9;
+    font-size: 16px;
+    font-weight: 400;
+    text-align: center;
+  }
+
+  .password-wrapper {
+    position: relative;
+    width: 100%;
+  }
+  
+  .password-wrapper input {
+    width: 100%;
+    padding: 12px;
+    padding-right: 40px; /* espace pour l’icône */
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 15px;
+    background-color: #f0f6ff;
+    transition: border-color 0.3s, background-color 0.3s;
+  }
+  
+  .password-wrapper input:focus {
+    border-color: #00b09b;
+    outline: none;
+  }
+  
+  .password-wrapper i {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    color: #777;
+    cursor: pointer;
+    font-size: 18px;
+    transition: color 0.3s, transform 0.2s ease;
+  }
+  
+  .password-wrapper i:hover {
+    color: #333;
+    transform: translateY(-50%) scale(1.1);
+  }
+  
+  
+  
+  button:hover {
+    background-color: #009688;
+  }
+  
