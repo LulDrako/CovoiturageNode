@@ -10,7 +10,7 @@
   <form action="/search-trips" method="POST" class="search-form">
     <input type="text" id="start" name="start" placeholder="Ville de départ" required>
     <input type="text" id="end" name="end" placeholder="Ville d’arrivée" required>
-    <input type="date" name="date" required>
+    <input type="date" id="departure-time" name="date" required>
     <button type="submit">Rechercher un trajet</button>
   </form>
 </div>
@@ -18,6 +18,7 @@
 <%- include('partials/footer') %>
 
 <script src="/js/googleMapsPassenger.js"></script>
+<script src="/js/passengerHome.js"></script>
 <script async defer
   src="https://maps.googleapis.com/maps/api/js?key=<%= googleMapsApiKey %>&libraries=places&callback=initGoogleMapsPassenger">
 </script>
