@@ -20,6 +20,7 @@
     "hmkit": "^13.2.1",
     "http-errors": "~1.6.3",
     "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.15.0",
     "mongoose": "^8.3.2",
     "morgan": "~1.9.1",
     "nodemon": "^3.1.0",
