@@ -66,7 +66,6 @@ Le projet repose sur :
 
 ## À venir 🔮
 
-- [ ] Réservation de places par les passagers
 - [ ] Intégration de Stripe pour les paiements
 - [ ] Dashboard de gestion personnel
 - [ ] Filtres avancés (prix, horaires, nombre de places)
