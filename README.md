@@ -4,7 +4,7 @@
 
 ## Description
 
-**EcoCovoit** est une plateforme de covoiturage conçue pour connecter facilement conducteurs et passagers. L'objectif est de proposer une solution simple, rapide et éco-responsable pour organiser des trajets ensemble.
+**KovoitGO** est une plateforme de covoiturage conçue pour connecter facilement conducteurs et passagers. L'objectif est de proposer une solution simple, rapide et éco-responsable pour organiser des trajets ensemble.
 
 Le projet repose sur :
 - **Node.js** pour le backend,
